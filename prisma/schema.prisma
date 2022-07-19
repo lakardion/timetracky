@@ -63,12 +63,19 @@ model VerificationToken {
 }
 
 //business
+model Client {
+    id String @id @default(cuid())
+    name String
+    projects Project[]
+}
 model Project{
     id String @id @default(cuid())
     hours Hour[]
     name String @unique
     creator User @relation(fields:[creatorId], references:[id],onDelete:Cascade)
     creatorId String
+    client Client @relation(fields:[clientId],references:[id],onDelete:Cascade)
+    clientId String
 }
 model Hour{
     id String @id @default(cuid())

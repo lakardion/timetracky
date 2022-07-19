@@ -1,5 +1,8 @@
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { FC, ReactNode } from "react";
+import { Button } from "./button";
 
 const routes: { key: string; href: string; label: string }[] = [
   { key: "hours", href: "hours", label: "Hours" },
@@ -8,42 +11,81 @@ const routes: { key: string; href: string; label: string }[] = [
   { key: "admin", href: "administration", label: "Administration" },
 ];
 
+const LoginActions = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const handleLogin = () => {
+    router.push("api/auth/signin");
+  };
+  const handleLogout = () => {
+    // router.push("api/auth/logout");
+  };
+
+  const handleGoToProfile = () => {
+    // router.push("/profile")
+  };
+
+  if (!session) {
+    return <Button onClick={handleLogin}>Login</Button>;
+  }
+
+  return (
+    <section className="flex gap-4 items-center">
+      <div>
+        Welcome{" "}
+        <button
+          className="hover:text-orange-400"
+          type="button"
+          onClick={handleGoToProfile}
+        >
+          {session.user?.name}
+        </button>
+      </div>
+      <Button onClick={handleLogout}>Logout</Button>
+    </section>
+  );
+};
+
+const Header = () => {
+  return (
+    <header className="bg-gray-800 text-white flex justify-between px-3 py-2 items-center">
+      <section>Timetracky</section>
+      <LoginActions />
+    </header>
+  );
+};
+
+const NavigationBar = () => {
+  return (
+    <aside>
+      <nav className="bg-gradient-to-b from-gray-800 to-gray-700">
+        <ul className="flex pl-2 gap-3 py-">
+          {routes.map((r) => (
+            <Link href={`/${r.href}`} key={r.key}>
+              <button
+                type="button"
+                className="text-white hover:text-orange-400"
+              >
+                {r.label}
+              </button>
+            </Link>
+          ))}
+        </ul>
+      </nav>
+    </aside>
+  );
+};
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  const handleLogin = () => {};
+  const { data } = useSession();
+
+  const router = useRouter();
+
   return (
     <>
-      <header className="bg-gray-800 text-white flex justify-between px-3 py-2 items-center">
-        <section>Timetracky</section>
-        <section>
-          <button
-            className="bg-orange-400 rounded px-2 py-0.5"
-            type="button"
-            onClick={handleLogin}
-          >
-            Login
-          </button>
-        </section>
-      </header>
+      <Header />
       <section>
-        <aside>
-          <nav className="bg-gradient-to-b from-gray-800 to-gray-700">
-            <ul className="flex pl-2 gap-3 py-">
-              {routes.map((r) => (
-                <Link href={r.href} key={r.key}>
-                  <button
-                    type="button"
-                    className="text-white hover:text-orange-400"
-                  >
-                    {r.label}
-                  </button>
-                </Link>
-              ))}
-            </ul>
-          </nav>
-        </aside>
-        <main className="container mx-auto flex flex-col items-center justify-center h-screen p-4">
-          {children}
-        </main>
+        <NavigationBar />
+        <main className="p-4">{children}</main>
       </section>
     </>
   );

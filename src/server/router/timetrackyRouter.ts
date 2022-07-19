@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { createRouter } from "./context";
 
 export const timetrackyRouter = createRouter()
@@ -13,5 +14,27 @@ export const timetrackyRouter = createRouter()
         include: { hours: true },
       });
       return projects;
+    },
+  })
+  .query("clients", {
+    async resolve({ ctx }) {
+      const clients = await ctx.prisma.client.findMany({
+        include: { projects: true },
+      });
+      return clients;
+    },
+  })
+  .mutation("createClient", {
+    input: z.object({
+      name: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      const newClient = await ctx.prisma.client.create({
+        data: {
+          name: input.name,
+        },
+      });
+
+      return newClient;
     },
   });
