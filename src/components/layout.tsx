@@ -56,6 +56,7 @@ const Header = () => {
 };
 
 const NavigationBar = () => {
+  const { pathname } = useRouter();
   return (
     <aside>
       <nav className="bg-gradient-to-b from-gray-800 to-gray-700">
@@ -64,7 +65,9 @@ const NavigationBar = () => {
             <Link href={`/${r.href}`} key={r.key}>
               <button
                 type="button"
-                className="text-white hover:text-orange-400"
+                className={`text-white hover:text-orange-400 ${
+                  pathname.includes("/" + r.href) ? "text-orange-400" : ""
+                }`}
               >
                 {r.label}
               </button>
