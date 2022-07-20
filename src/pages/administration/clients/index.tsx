@@ -1,12 +1,13 @@
-import { Button } from "components/button";
-import { Modal } from "components/modal";
-import { FC, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { trpc } from "utils/trpc";
+import { Button } from "components/button";
+import { FormValidationError } from "components/form";
+import { Modal } from "components/modal";
 import { Spinner } from "components/tw-spinner";
 import Head from "next/head";
+import { FC, useState } from "react";
+import { useForm } from "react-hook-form";
+import { trpc } from "utils/trpc";
+import { z } from "zod";
 
 type Inputs = {
   name: string;
@@ -51,7 +52,7 @@ const ClientEditCreateForm: FC<{
         {...register("name")}
         className="border border-solid border-gray-400 rounded-md px-2 py-1 text-black"
       />
-      <p className="text-red-500 font-medium">{errors.name?.message}</p>
+      <FormValidationError errors={errors} fieldKey="name" />
       <div className="flex gap-3">
         <Button
           type="submit"
