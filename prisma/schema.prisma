@@ -82,7 +82,6 @@ model Hour{
     date DateTime
     description String
     value Decimal
-    hourBilling HourBilling
     project Project @relation(fields:[projectId],references: [id])
     projectId String
     tags HourTag[]
@@ -103,9 +102,3 @@ model Tag{
     name String
     hours HourTag[]
 }
-
-enum HourBilling{
-    BILLED
-    UNBILLED
-}
-
