@@ -75,7 +75,7 @@ const ProjectsLayout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <>
       <Head>
-        <title>Timetracky ⏳ - Projects</title>
+        <title>Timetracky - Projects</title>
       </Head>
       {children}
     </>
