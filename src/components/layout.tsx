@@ -1,24 +1,35 @@
-import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
+import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useEffect } from "react";
 import { Button } from "./button";
 
-const routes: { key: string; href: string; label: string }[] = [
-  { key: "hours", href: "hours", label: "Hours" },
-  { key: "projects", href: "projects", label: "Projects" },
-  { key: "reports", href: "reports", label: "Reports" },
-  { key: "admin", href: "administration", label: "Administration" },
+const routes: {
+  key: string;
+  href: string;
+  label: string;
+  requireAuth: boolean;
+}[] = [
+  { key: "hours", href: "hours", label: "Hours", requireAuth: true },
+  { key: "projects", href: "projects", label: "Projects", requireAuth: true },
+  { key: "reports", href: "reports", label: "Reports", requireAuth: true },
+  {
+    key: "admin",
+    href: "administration",
+    label: "Administration",
+    requireAuth: true,
+  },
 ];
 
 const LoginActions = () => {
   const { data: session } = useSession();
-  const router = useRouter();
   const handleLogin = () => {
-    router.push("api/auth/signin");
+    signIn();
   };
   const handleLogout = () => {
-    // router.push("api/auth/logout");
+    signOut();
   };
 
   const handleGoToProfile = () => {
@@ -31,14 +42,21 @@ const LoginActions = () => {
 
   return (
     <section className="flex gap-4 items-center">
-      <div>
+      <div className="flex items-center gap-3">
         Welcome{" "}
         <button
-          className="hover:text-orange-400"
+          className="hover:text-orange-400 flex items-center gap-1"
           type="button"
           onClick={handleGoToProfile}
         >
           {session.user?.name}
+          <Image
+            src={session.user?.image ?? ""}
+            width={30}
+            height={30}
+            alt="user image"
+            className="rounded-full"
+          />
         </button>
       </div>
       <Button onClick={handleLogout}>Logout</Button>
@@ -55,31 +73,53 @@ const Header = () => {
   );
 };
 
-const NavigationBar = () => {
+const NavigationLinkList = () => {
   const { pathname } = useRouter();
+  const { data: session, status } = useSession();
+  if (status === "loading") {
+    return null;
+  }
+  const mySession = session as unknown as Session & { token: string };
+  console.log({ token: mySession?.token });
+  return (
+    <ul className="flex pl-2 gap-3 py-2">
+      {routes.flatMap((r) => {
+        if (r.requireAuth && !session) return [];
+        return [
+          <Link href={`/${r.href}`} key={r.key}>
+            <button
+              type="button"
+              className={`text-white hover:text-orange-400 ${
+                pathname.includes("/" + r.href) ? "text-orange-400" : ""
+              }`}
+            >
+              {r.label}
+            </button>
+          </Link>,
+        ];
+      })}
+    </ul>
+  );
+};
+
+const NavigationBar = () => {
+  const { status, data: session } = useSession();
+  if (status === "loading") {
+    return null;
+  }
+
   return (
     <aside>
       <nav className="bg-gradient-to-b from-gray-800 to-gray-700">
-        <ul className="flex pl-2 gap-3 py-">
-          {routes.map((r) => (
-            <Link href={`/${r.href}`} key={r.key}>
-              <button
-                type="button"
-                className={`text-white hover:text-orange-400 ${
-                  pathname.includes("/" + r.href) ? "text-orange-400" : ""
-                }`}
-              >
-                {r.label}
-              </button>
-            </Link>
-          ))}
-        </ul>
+        <NavigationLinkList />
       </nav>
     </aside>
   );
 };
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const { data } = useSession();
+
+  console.log({ session: data });
 
   const router = useRouter();
 

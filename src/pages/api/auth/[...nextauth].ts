@@ -12,9 +12,11 @@ if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_SECRET))
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {
-    session({ session, user }) {
+    session({ session, user, token }) {
+      console.log({ session, token });
       if (session.user) {
         session.user.id = user.id;
+        session.token = token;
       }
       return session;
     },
@@ -26,22 +28,11 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_SECRET,
     }),
-    // ...add more providers here
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        name: {
-          label: "Name",
-          type: "text",
-          placeholder: "Enter your name",
-        },
-      },
-      async authorize(credentials, _req) {
-        const user = { id: 1, name: credentials?.name ?? "J Smith" };
-        return user;
-      },
-    }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
+  jwt: {
+    secret: process.env.NEXTAUTH_SECRET,
+  },
 };
 
 export default NextAuth(authOptions);
