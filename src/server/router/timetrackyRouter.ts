@@ -6,19 +6,64 @@ import {
 import { z } from "zod";
 import { createRouter } from "./context";
 
+const DEFAULT_HOURS_PAGE_SIZE = 10;
+
+const getPagination = ({
+  count,
+  size,
+  page,
+}: {
+  count: number;
+  size: number;
+  page: number;
+}) => {
+  const maxPages = Math.ceil(count / size);
+  return {
+    count,
+    next: page + 1 > maxPages ? undefined : page + 1,
+    previous: page - 1 === 0 ? undefined : page - 1,
+  };
+};
+
 export const timetrackyRouter = createRouter()
   .query("hoursWithProject", {
-    async resolve({ ctx }) {
+    input: z.object({
+      page: z.number().optional(),
+      size: z.number().optional(),
+    }),
+    async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) throw new Error("Unauthorized");
+      const { page = 1, size = DEFAULT_HOURS_PAGE_SIZE } = input;
+      const totalHours = await ctx.prisma.hour.count({
+        where: {
+          userId: ctx.session.user.id,
+        },
+      });
+      const { count, next, previous } = getPagination({
+        count: totalHours,
+        size,
+        page,
+      });
       const hours = await ctx.prisma?.hour.findMany({
         where: {
           userId: ctx.session?.user?.id,
         },
+        skip: (page - 1) * size,
+        take: size,
         include: {
           project: true,
         },
+        orderBy: {
+          date: "desc",
+        },
       });
-      return hours.map((h) => ({ ...h, value: h.value.toNumber() }));
+      return {
+        hours: hours.map((h) => ({ ...h, value: h.value.toNumber() })),
+        page,
+        count,
+        next,
+        previous,
+      };
     },
   })
   .mutation("createHour", {
