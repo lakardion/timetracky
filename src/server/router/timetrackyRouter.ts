@@ -3,6 +3,7 @@ import {
   createProjectZod,
   createTagZod,
 } from "common/validators";
+import { maskEmail } from "utils";
 import { z } from "zod";
 import { createRouter } from "./context";
 
@@ -32,7 +33,9 @@ export const timetrackyRouter = createRouter()
       size: z.number().optional(),
     }),
     async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) throw new Error("Unauthorized");
+      if (!ctx.session?.user?.id) {
+        return ctx.res?.status(401).json({ message: "Unauthorized" });
+      }
       const { page = 1, size = DEFAULT_HOURS_PAGE_SIZE } = input;
       const totalHours = await ctx.prisma.hour.count({
         where: {
@@ -72,7 +75,9 @@ export const timetrackyRouter = createRouter()
       ctx,
       input: { date, description, projectId, tagIds, value },
     }) {
-      if (!ctx.session?.user?.id) throw new Error("Unauthorized");
+      if (!ctx.session?.user?.id) {
+        return ctx.res?.status(401).json({ message: "Unauthorized" });
+      }
       const newHour = await ctx.prisma.hour.create({
         data: {
           date,
@@ -137,7 +142,8 @@ export const timetrackyRouter = createRouter()
   .mutation("createProject", {
     input: createProjectZod,
     async resolve({ ctx, input: { name, clientId } }) {
-      if (!ctx.session?.user?.id) throw new Error("Unauthorized");
+      if (!ctx.session?.user?.id)
+        return ctx.res?.status(401).json({ message: "Unauthorized" });
       const newProject = prisma?.project.create({
         data: {
           name,
@@ -168,5 +174,35 @@ export const timetrackyRouter = createRouter()
       });
 
       return newClient;
+    },
+  })
+  .query("getUsers", {
+    async resolve({ ctx }) {
+      if (!ctx.session?.user) {
+        ctx.res?.status(401).json({ message: "Unauthorized" });
+      }
+      //todo: will need pagination
+      const users = await ctx.prisma.user.findMany({
+        include: {
+          hours: true,
+          projects: true,
+        },
+      });
+      return users.map((u) => {
+        const maskedEmail = maskEmail(u.email ?? "");
+        const hourCount = u.hours.reduce(
+          (sum, h) => sum + h.value.toNumber(),
+          0
+        );
+        const projectCount = u.projects.length;
+        return {
+          id: u.id,
+          name: u.name,
+          maskedEmail,
+          image: u.image,
+          hourCount,
+          projectCount,
+        };
+      });
     },
   });

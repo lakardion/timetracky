@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { IconType } from "react-icons";
 import { MdBusiness } from "react-icons/md";
 import { BsTags } from "react-icons/bs";
+import { FiUsers } from "react-icons/fi";
 
 interface AdminCard {
   title: string;
@@ -24,6 +25,12 @@ const administrationCards: AdminCard[] = [
     description: "Create, edit, delete hour tags",
     href: "tags",
     icon: BsTags,
+  },
+  {
+    title: "Users",
+    description: "View registered users",
+    href: "users",
+    icon: FiUsers,
   },
 ];
 const Administration = () => {
