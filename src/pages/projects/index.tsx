@@ -20,14 +20,19 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
     getValues,
   } = useForm<CreateProjectInputs>({ resolver: zodResolver(createProjectZod) });
 
+  const queryClient = trpc.useContext();
+
   const { mutateAsync, isLoading } = trpc.useMutation(
-    "timetracky.createProject"
+    "timetracky.createProject",
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["timetracky.projects"]);
+      },
+    }
   );
-  const queryInvalidator = trpc.useContext();
 
   const onSubmit = async (data: CreateProjectInputs) => {
     await mutateAsync(data);
-    queryInvalidator.invalidateQueries(["timetracky.projects"]);
     onFinished();
   };
 

@@ -17,11 +17,11 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
   } = useForm<CreateTagInputs>({
     resolver: zodResolver(createTagZod),
   });
-  const queryInvalidator = trpc.useContext();
+  const queryClient = trpc.useContext();
 
   const { isLoading, mutateAsync } = trpc.useMutation("timetracky.createTag", {
     onSuccess: () => {
-      queryInvalidator.invalidateQueries(["timetracky.tagsWithHourCount"]);
+      queryClient.invalidateQueries(["timetracky.tagsWithHourCount"]);
     },
   });
 
