@@ -79,8 +79,7 @@ const NavigationLinkList = () => {
   if (status === "loading") {
     return null;
   }
-  const mySession = session as unknown as Session & { token: string };
-  console.log({ token: mySession?.token });
+
   return (
     <ul className="flex pl-2 gap-3 py-2">
       {routes.flatMap((r) => {

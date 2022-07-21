@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CreateProjectInputs, createProjectZod } from "common/validators";
 import { Button } from "components/button";
 import { FormValidationError, Input, Select } from "components/form";
 import { Modal } from "components/modal";
@@ -7,19 +8,6 @@ import { ChangeEventHandler, FC, ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { trpc } from "../../utils/trpc";
-
-const createProjectValidationSchema = z.object({
-  name: z.string().min(1, "Required"),
-  clientId: z
-    .string()
-    .min(1, "Required")
-    .refine(
-      (data: string) => {
-        return data !== "-1";
-      },
-      { message: "Required" }
-    ),
-});
 
 const placeholderTextClass = "text-gray-400";
 
@@ -30,20 +18,27 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm({ resolver: zodResolver(createProjectValidationSchema) });
+  } = useForm<CreateProjectInputs>({ resolver: zodResolver(createProjectZod) });
 
-  const onSubmit = (data: any) => {};
+  const { mutateAsync, isLoading } = trpc.useMutation(
+    "timetracky.createProject"
+  );
+  const queryInvalidator = trpc.useContext();
+
+  const onSubmit = async (data: CreateProjectInputs) => {
+    await mutateAsync(data);
+    queryInvalidator.invalidateQueries(["timetracky.projects"]);
+    onFinished();
+  };
 
   const [selectClassName, setSelectClassName] = useState(placeholderTextClass);
   const handleSelectChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
-    console.log(e.target.value, e.target.value === "-1");
     if (e.target.value === "-1") {
       setSelectClassName(placeholderTextClass);
       return;
     }
     setSelectClassName("");
   };
-  console.log("selectedClassName", selectClassName);
 
   return (
     <form
@@ -77,10 +72,15 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
       </Select>
       <FormValidationError errors={errors} fieldKey="clientId" />
       <section className="flex gap-2">
-        <Button className="flex-grow" type="submit">
+        <Button
+          className="flex-grow"
+          type="submit"
+          isLoading={isLoading}
+          disabled={isLoading}
+        >
           Create project
         </Button>
-        <Button className="flex-grow" onClick={onFinished}>
+        <Button className="flex-grow" onClick={onFinished} disabled={isLoading}>
           Cancel
         </Button>
       </section>
@@ -108,44 +108,60 @@ const CreateProjectModal: FC<{ onClose: () => void }> = ({ onClose }) => {
 
 const ProjectsLayout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
-    <>
+    <section className="flex flex-col gap-2">
       <Head>
         <title>Timetracky - Projects</title>
       </Head>
       {children}
-    </>
+    </section>
   );
 };
 
-const Projects = () => {
+const ProjectList = () => {
   const { data: projects } = trpc.useQuery(["timetracky.projects"]);
-  const [showAddProject, setShowAddProject] = useState(false);
 
+  if (!projects?.length) {
+    return (
+      <div className="w-full flex justify-center">
+        <p className="italic">No projects found</p>
+      </div>
+    );
+  }
+  return (
+    <ul className="flex flex-col gap-3">
+      {projects.map((p) => {
+        const hoursCount = p.hours?.length ?? 0;
+        const hourPlural = "hour" + (hoursCount > 1 ? "s" : "");
+        return (
+          <li
+            key={p.id}
+            className="p-4 border border-solid border-gray-600/50 rounded hover:border-orange-400 flex justify-between"
+          >
+            <section aria-label="project name" className="font-medium">
+              {p.name}
+            </section>
+            <section aria-label="project hours">
+              {hoursCount} {hourPlural}
+            </section>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+const Projects = () => {
+  const [showAddProject, setShowAddProject] = useState(false);
   const handleToggleShow = () => {
     setShowAddProject((s) => !s);
   };
 
-  if (!projects?.length) {
-    return (
-      <ProjectsLayout>
-        <div className="w-full flex justify-center">
-          <Button onClick={handleToggleShow}>Add a project</Button>
-        </div>
-        {showAddProject && <CreateProjectModal onClose={handleToggleShow} />}
-      </ProjectsLayout>
-    );
-  }
-
   return (
     <ProjectsLayout>
-      <Button onClick={handleToggleShow}>Add a project</Button>
-      <ul className="flex flex-col">
-        {projects.map((p) => (
-          <li key={p.id}>
-            <section>{p.name}</section>
-          </li>
-        ))}
-      </ul>
+      <div className="w-full flex justify-center">
+        <Button onClick={handleToggleShow}>Add a project</Button>
+      </div>
+      <ProjectList />
+      {showAddProject && <CreateProjectModal onClose={handleToggleShow} />}
     </ProjectsLayout>
   );
 };

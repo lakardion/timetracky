@@ -26,7 +26,6 @@ const ClientEditCreateForm: FC<{
   } = useForm<Inputs>({
     resolver: zodResolver(clientEditCreateValidator),
   });
-
   const queryInvalidator = trpc.useContext();
   const { isLoading, mutateAsync } = trpc.useMutation(
     "timetracky.createClient",

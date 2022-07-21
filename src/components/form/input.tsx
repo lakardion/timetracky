@@ -14,7 +14,7 @@ export const Input: FC<InputHTMLAttributes<HTMLInputElement>> = forwardRef(
     return (
       <input
         {...props}
-        className="border border-solid border-gray-400 rounded-md px-2 py-1 text-black h-9"
+        className="border border-solid border-gray-400 rounded-md px-2 py-1 text-black h-9 placeholder:text-gray-500/80"
         ref={ref}
       />
     );

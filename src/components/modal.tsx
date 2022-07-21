@@ -1,9 +1,5 @@
-import { FC, ReactNode, useEffect, useState } from "react";
+import { FC, ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-// for some reason firefox does not support backdrop blur
-const agent = window.navigator.userAgent;
-const isFirefox = agent.indexOf("Firefox") !== -1;
 
 /**
  * Do not call this component until the dom has rendered fully, else we'd get an error with document not being found
@@ -21,10 +17,20 @@ export const Modal: FC<{
     setHasFaded(true);
   }, []);
 
+  const [blurOrBackdrop, setBlurOrBackdrop] = useState("");
+
+  useEffect(() => {
+    // for some reason firefox does not support backdrop blur
+    //needed to do this within client else window is possibly undefined
+    const agent = window.navigator.userAgent;
+    const isFirefox = agent.indexOf("Firefox") !== -1;
+    const blurOrBackdrop = isFirefox
+      ? "bg-gray-300/50"
+      : "bg-transparent backdrop-blur-sm";
+    setBlurOrBackdrop(blurOrBackdrop);
+  }, []);
+
   const opacityValue = hasFaded ? "opacity-100" : "opacity-0";
-  const blurOrBackdrop = isFirefox
-    ? "bg-gray-300/50"
-    : "bg-transparent backdrop-blur-sm";
 
   return createPortal(
     <>
