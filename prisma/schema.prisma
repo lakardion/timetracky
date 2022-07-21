@@ -87,6 +87,8 @@ model Hour{
     tags HourTag[]
     user User @relation(fields:[userId], references:[id])
     userId String
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now()) 
 }
 
 model HourTag{
