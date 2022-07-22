@@ -29,7 +29,8 @@ model Account {
     scope             String?
     id_token          String?
     session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
 }
@@ -39,7 +40,8 @@ model Session {
     sessionToken String   @unique
     userId       String
     expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -64,43 +66,51 @@ model VerificationToken {
 
 //business
 model Client {
-    id String @id @default(cuid())
-    name String
+    id       String    @id @default(cuid())
+    name     String
     projects Project[]
+    isActive Boolean   @default(true)
 }
-model Project{
-    id String @id @default(cuid())
-    hours Hour[]
-    name String @unique
-    creator User @relation(fields:[creatorId], references:[id],onDelete:Cascade)
+
+model Project {
+    id        String @id @default(cuid())
+    hours     Hour[]
+    name      String @unique
     creatorId String
-    client Client @relation(fields:[clientId],references:[id],onDelete:Cascade)
-    clientId String
+    clientId  String
+
+    client  Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+    creator User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 }
-model Hour{
-    id String @id @default(cuid())
-    date DateTime
+
+model Hour {
+    id          String    @id @default(cuid())
+    date        DateTime
     description String
-    value Decimal
-    project Project @relation(fields:[projectId],references: [id])
-    projectId String
-    tags HourTag[]
-    user User @relation(fields:[userId], references:[id])
-    userId String
-    updatedAt DateTime @updatedAt
-    createdAt DateTime @default(now()) 
+    value       Decimal
+    projectId   String
+    tags        HourTag[]
+    userId      String
+    updatedAt   DateTime  @updatedAt
+    createdAt   DateTime  @default(now())
+
+    user    User    @relation(fields: [userId], references: [id])
+    project Project @relation(fields: [projectId], references: [id])
 }
 
-model HourTag{
-    hour Hour @relation(fields:[hourId],references:[id])
+model HourTag {
     hourId String
-    tag Tag @relation(fields:[tagId], references:[id])
-    tagId String
+    tagId  String
 
-    @@id([hourId,tagId])
+    hour Hour @relation(fields: [hourId], references: [id])
+    tag  Tag  @relation(fields: [tagId], references: [id])
+
+    @@id([hourId, tagId])
 }
-model Tag{
-    id String @id @default(cuid())
-    name String
-    hours HourTag[]
+
+model Tag {
+    id       String    @id @default(cuid())
+    name     String
+    isActive Boolean   @default(true)
+    hours    HourTag[]
 }
