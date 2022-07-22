@@ -1,22 +1,7 @@
-import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-/**
- * Do not call this component until the dom has rendered fully, else we'd get an error with document not being found
- * @param param0
- * @returns
- */
-export const Modal: FC<{
-  onBackdropClick: () => void;
-  children: ReactNode;
-  className?: string;
-}> = ({ onBackdropClick, className = "", children }) => {
-  const [hasFaded, setHasFaded] = useState(false);
-
-  useEffect(() => {
-    setHasFaded(true);
-  }, []);
-
+const useBrowserAwareBackdrop = () => {
   const [blurOrBackdrop, setBlurOrBackdrop] = useState("");
 
   useEffect(() => {
@@ -30,7 +15,37 @@ export const Modal: FC<{
     setBlurOrBackdrop(blurOrBackdrop);
   }, []);
 
-  const opacityValue = hasFaded ? "opacity-100" : "opacity-0";
+  return blurOrBackdrop;
+};
+
+/**
+ * Gives up a different opacity after the first render to allow animation to be visible
+ */
+const useFadeAfterRender = () => {
+  const [hasFaded, setHasFaded] = useState(false);
+
+  useEffect(() => {
+    setHasFaded(true);
+  }, []);
+
+  const stableOpacity = useMemo(
+    () => (hasFaded ? "opacity-100" : "opacity-0"),
+    [hasFaded]
+  );
+
+  return stableOpacity;
+};
+
+/**
+ * Do not call this component until the dom has rendered fully, else we'd get an error with document not being found
+ */
+export const Modal: FC<{
+  onBackdropClick: () => void;
+  children: ReactNode;
+  className?: string;
+}> = ({ onBackdropClick, className = "", children }) => {
+  const blurOrBackdrop = useBrowserAwareBackdrop();
+  const opacityValue = useFadeAfterRender();
 
   return createPortal(
     <>
