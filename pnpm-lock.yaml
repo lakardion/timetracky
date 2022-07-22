@@ -19,6 +19,8 @@ specifiers:
   next: 12.2.1
   next-auth: ^4.10.0
   postcss: ^8.4.14
+  prettier: ^2.7.1
+  prettier-plugin-tailwindcss: ^0.1.12
   prisma: ^4.1.0
   react: 18.2.0
   react-dom: 18.2.0
@@ -60,6 +62,8 @@ devDependencies:
   eslint: 8.18.0
   eslint-config-next: 12.2.1_b5e7v2qnwxfo6hmiq56u52mz3e
   postcss: 8.4.14
+  prettier: 2.7.1
+  prettier-plugin-tailwindcss: 0.1.12_prettier@2.7.1
   prisma: 4.1.0
   tailwindcss: 3.1.6
   typescript: 4.7.4
@@ -2443,6 +2447,21 @@ packages:
   /prelude-ls/1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+    dev: true
+
+  /prettier-plugin-tailwindcss/0.1.12_prettier@2.7.1:
+    resolution: {integrity: sha512-pEZ6tppwknCeq3ObR9g8t61AhWtVRRR3I0EQNeiRrrJ3D42FJGeUDxiFc/LJRYEeAx5JOxagsF0MICwuWOJa+w==}
+    engines: {node: '>=12.17.0'}
+    peerDependencies:
+      prettier: '>=2.2.0'
+    dependencies:
+      prettier: 2.7.1
+    dev: true
+
+  /prettier/2.7.1:
+    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /pretty-format/3.8.0:

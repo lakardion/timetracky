@@ -1,9 +1,8 @@
-import { Session } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FC, ReactNode, useEffect } from "react";
+import { FC, ReactNode } from "react";
 import { Button } from "./button";
 
 const routes: {
