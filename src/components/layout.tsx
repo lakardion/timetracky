@@ -41,8 +41,8 @@ const LoginActions = () => {
 
   return (
     <section className="flex gap-4 items-center">
-      <div className="flex items-center gap-3">
-        Welcome{" "}
+      <div className="inline-flex flex-wrap gap-1 items-center justify-end">
+        <p className="hidden sm:inline-flex">Welcome</p>
         <button
           className="hover:text-orange-400 flex items-center gap-1"
           type="button"
