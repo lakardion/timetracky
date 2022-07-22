@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateTagInputs, createTagZod } from "common/validators";
 import { Button } from "components/button";
+import { ConfirmForm } from "components/confirm-form";
 import { FormValidationError } from "components/form";
 import { Modal } from "components/modal";
 import Head from "next/head";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
+import { MdDeleteOutline } from "react-icons/md";
 import { trpc } from "utils/trpc";
 import { z } from "zod";
 
@@ -57,24 +59,49 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
     </form>
   );
 };
-const TagList = () => {
+
+const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
+  onTagDelete,
+}) => {
   const { data: tagsWithHour } = trpc.useQuery([
     "timetracky.tagsWithHourCount",
   ]);
+  const createTagDeleteHandler = (tagId: string) => () => {
+    onTagDelete(tagId);
+  };
+  const [hoveringId, setHoveringId] = useState("");
   if (!tagsWithHour) return null;
-  if (!tagsWithHour?.length) return <p>No tags added yet</p>;
+  if (!tagsWithHour?.length)
+    return <p className="text-base italic pt-3">No tags added yet</p>;
+  const createHoverHandler = (id: string) => () => {
+    setHoveringId(id);
+  };
+  const clearHover = () => {
+    setHoveringId("");
+  };
+
   return (
     <>
-      <ul className="flex flex-wrap gap-3">
+      <ul className="flex flex-wrap gap-3 pt-3">
         {tagsWithHour.map((t) => (
-          <article
-            className="border border-solid border-orange-600/20 shadow-sm py-2 px-4 rounded-l-full rounded-r-full bg-orange-200 "
+          <li
+            className="relative border border-solid border-orange-600/20 shadow-sm py-2 px-4 rounded-l-full rounded-r-full bg-orange-200 "
             key={t.id}
+            onMouseEnter={createHoverHandler(t.id)}
+            onMouseLeave={clearHover}
           >
             <p>
               {t.name} ({t.hourCount})
             </p>
-          </article>
+            <button
+              className={`${
+                hoveringId === t.id ? "" : "hidden"
+              } absolute bg-red-300 border-2 border-solid border-gray-400 rounded-full p-1 -top-3 -right-3`}
+              onClick={createTagDeleteHandler(t.id)}
+            >
+              <MdDeleteOutline size={18} />
+            </button>
+          </li>
         ))}
       </ul>
     </>
@@ -83,13 +110,41 @@ const TagList = () => {
 
 const Tags = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [currentTagId, setCurrentTagId] = useState("");
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  const queryClient = trpc.useContext();
+  const {
+    isLoading: isDeleting,
+    error: deleteError,
+    mutateAsync: deleteTag,
+  } = trpc.useMutation("timetracky.deleteTag", {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["timetracky.tags"]);
+      queryClient.invalidateQueries(["timetracky.tagsWithHourCount"]);
+      queryClient.invalidateQueries(["timetracky.hoursWithTagNProject"]);
+    },
+  });
+
   const handleClose = () => {
     setIsOpen(false);
   };
   const handleOpen = () => {
     setIsOpen(true);
   };
-  const handleSubmit = () => {};
+  const handleConfirmModalClose = () => {
+    setIsConfirmModalOpen(false);
+    setCurrentTagId("");
+  };
+  const handleOpenConfirmDelete = (tagId: string) => {
+    setIsConfirmModalOpen(true);
+    setCurrentTagId(tagId);
+  };
+  const handleConfirmDelete = async () => {
+    await deleteTag({ tagId: currentTagId });
+    handleConfirmModalClose();
+  };
+
   return (
     <>
       <Head>
@@ -100,11 +155,22 @@ const Tags = () => {
         <Button onClick={handleOpen}>Add a tag</Button>
       </section>
       <section className="pt-2 flex flex-wrap gap-3 justify-center">
-        <TagList />
+        <TagList onTagDelete={handleOpenConfirmDelete} />
       </section>
       {isOpen ? (
-        <Modal onClose={handleClose}>
+        <Modal onBackdropClick={handleClose}>
           <TagEditCreateForm onFinish={handleClose} />
+        </Modal>
+      ) : null}
+      {isConfirmModalOpen ? (
+        <Modal onBackdropClick={handleConfirmModalClose}>
+          <ConfirmForm
+            body="Confirm delete tag"
+            onCancel={handleConfirmModalClose}
+            onConfirm={handleConfirmDelete}
+            isConfirming={isDeleting}
+            errorMessage={deleteError?.message}
+          />
         </Modal>
       ) : null}
     </>

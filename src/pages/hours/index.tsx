@@ -25,7 +25,7 @@ const AddHour = () => {
 
   const { mutateAsync, isLoading } = trpc.useMutation("timetracky.createHour", {
     onSuccess: () => {
-      queryClient.invalidateQueries(["timetracky.hoursWithProject"]);
+      queryClient.invalidateQueries(["timetracky.hoursWithTagNProject"]);
     },
   });
   const {
@@ -136,7 +136,7 @@ const AddHour = () => {
         name="tagIds"
         control={control}
         defaultValue={[]}
-        render={({ field, fieldState, formState }) => (
+        render={({ field }) => (
           <ReactSelect
             isMulti
             options={tagOptions}
@@ -162,7 +162,7 @@ const AddHour = () => {
 
 const HourList: FC<{ page: number }> = ({ page }) => {
   const { data: paginatedHours } = trpc.useQuery(
-    ["timetracky.hoursWithProject", { page }],
+    ["timetracky.hoursWithTagNProject", { page }],
     { keepPreviousData: true }
   );
 
@@ -200,7 +200,7 @@ const HourList: FC<{ page: number }> = ({ page }) => {
 const Hours = () => {
   const [page, setPage] = useState(1);
   const { isLoading } = trpc.useQuery([
-    "timetracky.hoursWithProject",
+    "timetracky.hoursWithTagNProject",
     { page },
   ]);
   const { data: projects } = trpc.useQuery(["timetracky.projects"]);

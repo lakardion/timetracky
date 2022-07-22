@@ -1,12 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateProjectInputs, createProjectZod } from "common/validators";
 import { Button } from "components/button";
-import { FormValidationError, Input, Select } from "components/form";
+import { FormValidationError, Input } from "components/form";
 import { Modal } from "components/modal";
 import Head from "next/head";
-import { ChangeEventHandler, FC, ReactNode, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { ChangeEventHandler, FC, ReactNode, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import ReactSelect from "react-select";
 import { trpc } from "../../utils/trpc";
 
 const placeholderTextClass = "text-gray-400";
@@ -17,6 +17,7 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
     register,
     handleSubmit,
     formState: { errors },
+    control,
     getValues,
   } = useForm<CreateProjectInputs>({ resolver: zodResolver(createProjectZod) });
 
@@ -45,6 +46,11 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
     setSelectClassName("");
   };
 
+  const clientOptions = useMemo(() => {
+    if (!clients) return [];
+    return clients.map((c) => ({ value: c.id, label: c.name }));
+  }, [clients]);
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -59,22 +65,24 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
       <label htmlFor="clientId" className="font-medium">
         Client
       </label>
-      <Select
-        {...register("clientId")}
-        placeholder="Select a client"
-        defaultValue={-1}
-        onChange={handleSelectChange}
-        className={selectClassName}
-      >
-        <option key={-1} value={-1}>
-          Select a client
-        </option>
-        {clients?.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </Select>
+      <Controller
+        name="clientId"
+        control={control}
+        defaultValue={undefined}
+        render={({ field }) => (
+          <ReactSelect
+            options={clientOptions}
+            ref={field.ref}
+            onBlur={field.onBlur}
+            className="text-black"
+            value={clientOptions.find((co) => co.value === field.value)}
+            onChange={(value) => {
+              field.onChange(value?.value);
+            }}
+            placeholder="Select a client..."
+          />
+        )}
+      />
       <FormValidationError errors={errors} fieldKey="clientId" />
       <section className="flex gap-2">
         <Button
@@ -95,15 +103,9 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
 const CreateProjectModal: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [transition, setTransition] = useState(false);
 
-  //? lol handcraft animation
-  useEffect(() => {
-    setTransition(true);
-  }, []);
-
-  const opacityValue = transition ? "opacity-100" : "opacity-0";
   return (
     <Modal
-      onClose={onClose}
+      onBackdropClick={onClose}
       className="min-w-[400px] min-h-[300px] flex flex-col"
     >
       <CreateProjectForm onFinished={onClose} />
@@ -159,6 +161,20 @@ const Projects = () => {
   const handleToggleShow = () => {
     setShowAddProject((s) => !s);
   };
+  const { data: clients } = trpc.useQuery(["timetracky.clients"]);
+
+  if (!clients?.length) {
+    //todo: detect if user is admin and add link to go to administration or invite user to ask an admin to add it
+    return (
+      <ProjectsLayout>
+        <section>
+          <p className="text-center italic text-base">
+            No clients found. Clients are required to create projects
+          </p>
+        </section>
+      </ProjectsLayout>
+    );
+  }
 
   return (
     <ProjectsLayout>

@@ -27,7 +27,7 @@ const getPagination = ({
 };
 
 export const timetrackyRouter = createRouter()
-  .query("hoursWithProject", {
+  .query("hoursWithTagNProject", {
     input: z.object({
       page: z.number().optional(),
       size: z.number().optional(),
@@ -55,6 +55,11 @@ export const timetrackyRouter = createRouter()
         take: size,
         include: {
           project: true,
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
         },
         orderBy: {
           date: "desc",
@@ -131,6 +136,14 @@ export const timetrackyRouter = createRouter()
       return newTag;
     },
   })
+  .mutation("deleteTag", {
+    input: z.object({
+      tagId: z.string(),
+    }),
+    async resolve({ ctx, input: { tagId } }) {
+      await ctx.prisma.tag.delete({ where: { id: tagId } });
+    },
+  })
   .query("projects", {
     async resolve({ ctx }) {
       const projects = await ctx.prisma.project.findMany({
@@ -152,6 +165,61 @@ export const timetrackyRouter = createRouter()
         },
       });
       return newProject;
+    },
+  })
+  .query("getClient", {
+    input: z.object({
+      clientId: z.string(),
+    }),
+    async resolve({ ctx, input: { clientId } }) {
+      const client = await ctx.prisma.client.findUnique({
+        where: {
+          id: clientId,
+        },
+      });
+      return client;
+    },
+  })
+  .mutation("updateClient", {
+    input: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
+    async resolve({ ctx, input: { id, name } }) {
+      const updated = await ctx.prisma.client.update({
+        where: {
+          id,
+        },
+        data: { name },
+      });
+      return updated;
+    },
+  })
+  .mutation("deleteClient", {
+    input: z.object({
+      clientId: z.string(),
+    }),
+    async resolve({ ctx, input: { clientId } }) {
+      const client = await ctx.prisma.client.findUnique({
+        include: { projects: true },
+        where: { id: clientId },
+      });
+      if (client?.projects.length) {
+        await ctx.prisma.client.update({
+          data: {
+            isActive: false,
+          },
+          where: {
+            id: clientId,
+          },
+        });
+        return;
+      }
+      await ctx.prisma.client.delete({
+        where: {
+          id: clientId,
+        },
+      });
     },
   })
   .query("clients", {
