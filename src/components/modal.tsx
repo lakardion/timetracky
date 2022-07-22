@@ -7,10 +7,10 @@ import { createPortal } from "react-dom";
  * @returns
  */
 export const Modal: FC<{
-  onClose: () => void;
+  onBackdropClick: () => void;
   children: ReactNode;
   className?: string;
-}> = ({ onClose, className = "", children }) => {
+}> = ({ onBackdropClick, className = "", children }) => {
   const [hasFaded, setHasFaded] = useState(false);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export const Modal: FC<{
       <section
         aria-label="backdrop"
         className={`absolute  top-0 right-0 h-screen w-screen transition-opacity ease-in duration-200 ${blurOrBackdrop} ${opacityValue}`}
-        onClick={onClose}
+        onClick={onBackdropClick}
       ></section>
       <section
         aria-label="modal body"
