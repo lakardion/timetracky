@@ -33,6 +33,7 @@ const AddHour = () => {
     formState: { errors },
     control,
     handleSubmit,
+    reset,
   } = useForm<CreateHourFormInputs>({
     resolver: zodResolver(createHourZodForm),
   });
@@ -60,6 +61,7 @@ const AddHour = () => {
       value: parseFloat(data.value),
     };
     const newHour = await mutateAsync(parsedData);
+    reset();
   };
 
   if (!projects?.length) {
@@ -185,7 +187,7 @@ const HourList: FC<{ page: number }> = ({ page }) => {
               {format(h.date, "M-dd-yyyy")}
             </p>
           </section>
-          <section>
+          <section className="flex flex-col gap-2 basis-11/12">
             <h1 className="text-3xl">{h.project.name}</h1>
             <p aria-label="description" className="text-sm">
               {h.description}
