@@ -19,11 +19,11 @@ const Users = () => {
           const userExtraInfo =
             u.projectCount && u.hourCount
               ? `${u.hourCount} hours across ${u.projectCount} projects`
-              : "";
+              : "No hours registered yet";
           return (
             <li
               key={u.id}
-              className="flex bg-slate-500 w-80 p-4 rounded-lg gap-3"
+              className="flex bg-slate-400 w-80 p-4 rounded-lg gap-3"
             >
               <section className="rounded-full border border-solid bg-black/40 border-gray-400/30">
                 <Image

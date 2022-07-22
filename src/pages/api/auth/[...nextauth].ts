@@ -13,7 +13,6 @@ export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {
     session({ session, user, token }) {
-      console.log({ session, token });
       if (session.user) {
         session.user.id = user.id;
         session.token = token;

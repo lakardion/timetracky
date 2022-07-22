@@ -203,6 +203,8 @@ const Hours = () => {
     "timetracky.hoursWithProject",
     { page },
   ]);
+  const { data: projects } = trpc.useQuery(["timetracky.projects"]);
+
   return (
     <section className="flex flex-col gap-3 md:flex-row md:gap-8 md:justify-around md:px-4">
       <Head>
@@ -212,13 +214,15 @@ const Hours = () => {
       <section className="flex justify-center">
         <AddHour />
       </section>
-      <section
-        aria-label="hours list"
-        className="flex flex-col items-center justify-center relative md:flex-grow"
-      >
-        <BackdropSpinner isLoading={isLoading} />
-        <HourList page={page} />
-      </section>
+      {projects?.length ? (
+        <section
+          aria-label="hours list"
+          className="flex flex-col items-center justify-center relative md:flex-grow"
+        >
+          <BackdropSpinner isLoading={isLoading} />
+          <HourList page={page} />
+        </section>
+      ) : null}
     </section>
   );
 };
