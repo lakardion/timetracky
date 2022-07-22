@@ -26,7 +26,7 @@ const routes: {
 const LoginActions = () => {
   const { data: session } = useSession();
   const handleLogin = () => {
-    signIn();
+    signIn("google");
   };
   const handleLogout = () => {
     signOut();
@@ -116,12 +116,6 @@ const NavigationBar = () => {
   );
 };
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  const { data } = useSession();
-
-  console.log({ session: data });
-
-  const router = useRouter();
-
   return (
     <>
       <Header />
