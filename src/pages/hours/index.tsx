@@ -37,29 +37,28 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
 }) => {
   //todo: might need to define pagination?. These could go wild otherwise
   //todo I think I might have to kick off this to the react select components rather
-  const { data: projects } = trpc.useQuery(["timetracky.projects"]);
-  const { data: tags } = trpc.useQuery(["timetracky.tags"]);
+  const { data: projects } = trpc.useQuery(["projects.all"]);
+  const { data: tags } = trpc.useQuery(["tags.all"]);
 
   const queryClient = trpc.useContext();
 
   const { mutateAsync: createHour, isLoading: isHourCreating } =
-    trpc.useMutation("timetracky.createHour", {
+    trpc.useMutation("hours.create", {
       onSuccess: () => {
-        queryClient.invalidateQueries(["timetracky.hoursWithTagNProject"]);
+        queryClient.invalidateQueries(["hours.withTagAndProject"]);
       },
     });
   const { mutateAsync: editHour, isLoading: isHourEditing } = trpc.useMutation(
-    "timetracky.editHour",
+    "hours.edit",
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["timetracky.hoursWithTagNProject"]);
+        queryClient.invalidateQueries(["hours.withTagAndProject"]);
       },
     }
   );
-  const { data: hour } = trpc.useQuery(
-    ["timetracky.getHour", { hourId: hourId ?? "" }],
-    { enabled: Boolean(hourId) }
-  );
+  const { data: hour } = trpc.useQuery(["hours.single", { id: hourId ?? "" }], {
+    enabled: Boolean(hourId),
+  });
 
   const defaultValues = useMemo(
     () => ({
@@ -117,7 +116,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
     };
     hour && hourId
       ? await editHour({
-          hourId,
+          id: hourId,
           oldTagIds: hour.tags?.map((t) => t.tagId) ?? [],
           ...parsedData,
         })
@@ -259,7 +258,7 @@ const HourList: FC<{
   selectedHourId?: string;
 }> = ({ page, onHourEdit, onHourDelete, selectedHourId }) => {
   const { data: paginatedHours } = trpc.useQuery(
-    ["timetracky.hoursWithTagNProject", { page }],
+    ["hours.withTagAndProject", { page }],
     { keepPreviousData: true }
   );
   const [hoveringId, setHoveringId] = useState("");
@@ -362,20 +361,17 @@ const HourList: FC<{
 
 const Hours = () => {
   const [page, setPage] = useState(1);
-  const { isLoading } = trpc.useQuery([
-    "timetracky.hoursWithTagNProject",
-    { page },
-  ]);
-  const { data: projects } = trpc.useQuery(["timetracky.projects"]);
+  const { isLoading } = trpc.useQuery(["hours.withTagAndProject", { page }]);
+  const { data: projects } = trpc.useQuery(["projects.all"]);
   const [editingHourId, setEditingHourId] = useState("");
   const queryClient = trpc.useContext();
   const {
     mutateAsync: deleteOne,
     isLoading: isDeleting,
     error: deleteError,
-  } = trpc.useMutation("timetracky.deleteHour", {
+  } = trpc.useMutation("hours.delete", {
     onSuccess: () => {
-      queryClient.invalidateQueries("timetracky.hoursWithTagNProject");
+      queryClient.invalidateQueries("hours.withTagAndProject");
     },
   });
   const [deletingHourId, setDeletingHourId] = useState("");

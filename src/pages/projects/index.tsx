@@ -12,7 +12,7 @@ import { trpc } from "../../utils/trpc";
 const placeholderTextClass = "text-gray-400";
 
 const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
-  const { data: clients } = trpc.useQuery(["timetracky.clients"]);
+  const { data: clients } = trpc.useQuery(["clients.all"]);
   const {
     register,
     handleSubmit,
@@ -23,14 +23,11 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
 
   const queryClient = trpc.useContext();
 
-  const { mutateAsync, isLoading } = trpc.useMutation(
-    "timetracky.createProject",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["timetracky.projects"]);
-      },
-    }
-  );
+  const { mutateAsync, isLoading } = trpc.useMutation("projects.create", {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["projects.all"]);
+    },
+  });
 
   const onSubmit = async (data: CreateProjectInputs) => {
     await mutateAsync(data);
@@ -125,7 +122,7 @@ const ProjectsLayout: FC<{ children: ReactNode }> = ({ children }) => {
 };
 
 const ProjectList = () => {
-  const { data: projects } = trpc.useQuery(["timetracky.projects"]);
+  const { data: projects } = trpc.useQuery(["projects.all"]);
 
   if (!projects?.length) {
     return (
@@ -161,7 +158,7 @@ const Projects = () => {
   const handleToggleShow = () => {
     setShowAddProject((s) => !s);
   };
-  const { data: clients } = trpc.useQuery(["timetracky.clients"]);
+  const { data: clients } = trpc.useQuery(["clients.all"]);
 
   if (!clients?.length) {
     //todo: detect if user is admin and add link to go to administration or invite user to ask an admin to add it

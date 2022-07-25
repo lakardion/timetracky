@@ -21,9 +21,9 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
   });
   const queryClient = trpc.useContext();
 
-  const { isLoading, mutateAsync } = trpc.useMutation("timetracky.createTag", {
+  const { isLoading, mutateAsync } = trpc.useMutation("tags.create", {
     onSuccess: () => {
-      queryClient.invalidateQueries(["timetracky.tagsWithHourCount"]);
+      queryClient.invalidateQueries(["tags.withHourCount"]);
     },
   });
 
@@ -63,9 +63,7 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
 const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
   onTagDelete,
 }) => {
-  const { data: tagsWithHour } = trpc.useQuery([
-    "timetracky.tagsWithHourCount",
-  ]);
+  const { data: tagsWithHour } = trpc.useQuery(["tags.withHourCount"]);
   const createTagDeleteHandler = (tagId: string) => () => {
     onTagDelete(tagId);
   };
@@ -118,11 +116,11 @@ const Tags = () => {
     isLoading: isDeleting,
     error: deleteError,
     mutateAsync: deleteTag,
-  } = trpc.useMutation("timetracky.deleteTag", {
+  } = trpc.useMutation("tags.delete", {
     onSuccess: () => {
-      queryClient.invalidateQueries(["timetracky.tags"]);
-      queryClient.invalidateQueries(["timetracky.tagsWithHourCount"]);
-      queryClient.invalidateQueries(["timetracky.hoursWithTagNProject"]);
+      queryClient.invalidateQueries(["tags.all"]);
+      queryClient.invalidateQueries(["tags.withHourCount"]);
+      queryClient.invalidateQueries(["hours.withTagAndProject"]);
     },
   });
 

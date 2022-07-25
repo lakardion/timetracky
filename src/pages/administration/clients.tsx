@@ -23,23 +23,23 @@ const ClientEditCreateForm: FC<{
 }> = ({ onFinish, clientId = "" }) => {
   const queryInvalidator = trpc.useContext();
   const { data: client } = trpc.useQuery(
-    ["timetracky.getClient", { clientId: clientId }],
+    ["clients.single", { clientId: clientId }],
     { enabled: Boolean(clientId) }
   );
 
   const { isLoading, mutateAsync: createClient } = trpc.useMutation(
-    "timetracky.createClient",
+    "clients.create",
     {
       onSuccess: () => {
-        queryInvalidator.invalidateQueries(["timetracky.clients"]);
+        queryInvalidator.invalidateQueries(["clients.all"]);
       },
     }
   );
 
   const { isLoading: isEditClientLoading, mutateAsync: updateClient } =
-    trpc.useMutation("timetracky.updateClient", {
+    trpc.useMutation("clients.update", {
       onSuccess: () => {
-        queryInvalidator.invalidateQueries(["timetracky.clients"]);
+        queryInvalidator.invalidateQueries(["clients.all"]);
       },
     });
 
@@ -96,7 +96,7 @@ const ClientList: FC<{
   onClientClick: (clientId: string) => void;
   onClientDelete: (clientId: string) => void;
 }> = ({ onClientClick, onClientDelete }) => {
-  const { data: clients, isLoading } = trpc.useQuery(["timetracky.clients"], {
+  const { data: clients, isLoading } = trpc.useQuery(["clients.all"], {
     keepPreviousData: true,
   });
 
@@ -167,17 +167,17 @@ const Clients = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [currentClientId, setCurrentClientId] = useState("");
   const { data: client } = trpc.useQuery(
-    ["timetracky.getClient", { clientId: currentClientId }],
+    ["clients.single", { clientId: currentClientId }],
     {
       enabled: Boolean(currentClientId),
     }
   );
   const queryClient = trpc.useContext();
   const { isLoading: isDeleting, mutateAsync: deleteClient } = trpc.useMutation(
-    "timetracky.deleteClient",
+    "clients.delete",
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["timetracky.clients"]);
+        queryClient.invalidateQueries(["clients.all"]);
       },
     }
   );

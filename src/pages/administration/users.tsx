@@ -3,7 +3,7 @@ import Image from "next/image";
 import { trpc } from "utils/trpc";
 
 const Users = () => {
-  const { data: users } = trpc.useQuery(["timetracky.getUsers"]);
+  const { data: users } = trpc.useQuery(["auth.getUsers"]);
 
   if (!users) {
     return <></>;
