@@ -1,11 +1,17 @@
+import { FieldError, Merge } from "react-hook-form";
+
 export const FormValidationError = ({
-  errors,
-  fieldKey,
+  error,
 }: {
-  errors: any;
-  fieldKey: string;
+  error: Merge<FieldError, (FieldError | undefined)[]> | undefined;
 }) => {
-  return errors?.[fieldKey]?.message ? (
-    <p className="text-red-500 font-medium">{errors[fieldKey].message ?? ""}</p>
+  if (Array.isArray(error))
+    return (
+      <p className="text-red-500 font-medium">
+        {error.flatMap((e) => (e?.message ? [e.message] : [])).join(" ") ?? ""}
+      </p>
+    );
+  return error?.message ? (
+    <p className="text-red-500 font-medium">{error.message ?? ""}</p>
   ) : null;
 };

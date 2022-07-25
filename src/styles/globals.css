@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.timetracky__control.timetracky__control--is-focused {
+  @apply shadow-none outline-none ring-2 ring-orange-400;
+}

@@ -84,18 +84,18 @@ model Project {
 }
 
 model Hour {
-    id          String    @id @default(cuid())
+    id          String   @id @default(cuid())
     date        DateTime
     description String
     value       Decimal
     projectId   String
-    tags        HourTag[]
     userId      String
-    updatedAt   DateTime  @updatedAt
-    createdAt   DateTime  @default(now())
+    updatedAt   DateTime @updatedAt
+    createdAt   DateTime @default(now())
 
-    user    User    @relation(fields: [userId], references: [id])
-    project Project @relation(fields: [projectId], references: [id])
+    tags    HourTag[]
+    user    User      @relation(fields: [userId], references: [id])
+    project Project   @relation(fields: [projectId], references: [id])
 }
 
 model HourTag {

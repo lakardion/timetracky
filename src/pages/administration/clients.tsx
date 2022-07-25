@@ -74,7 +74,7 @@ const ClientEditCreateForm: FC<{
         {...register("name")}
         className="border border-solid border-gray-400 rounded-md px-2 py-1 text-black"
       />
-      <FormValidationError errors={errors} fieldKey="name" />
+      <FormValidationError error={errors.name} />
       <div className="flex gap-3">
         <Button
           type="submit"

@@ -27,6 +27,29 @@ const getPagination = ({
 };
 
 export const timetrackyRouter = createRouter()
+  .query("getHour", {
+    input: z.object({
+      hourId: z.string(),
+    }),
+    async resolve({ ctx, input: { hourId } }) {
+      if (!ctx.session?.user?.id) {
+        return ctx.res?.status(401).json({ message: "Unauthorized" });
+      }
+      const hour = await ctx.prisma.hour.findUnique({
+        where: { id: hourId },
+        include: {
+          project: true,
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      });
+
+      return { ...hour, value: hour?.value.toNumber() };
+    },
+  })
   .query("hoursWithTagNProject", {
     input: z.object({
       page: z.number().optional(),
@@ -47,6 +70,7 @@ export const timetrackyRouter = createRouter()
         size,
         page,
       });
+      //TODO: might be able to improve this with selections
       const hours = await ctx.prisma?.hour.findMany({
         where: {
           userId: ctx.session?.user?.id,
@@ -98,6 +122,61 @@ export const timetrackyRouter = createRouter()
         },
       });
       return newHour;
+    },
+  })
+  .mutation("editHour", {
+    input: z
+      .object({ hourId: z.string(), oldTagIds: z.array(z.string()) })
+      .extend(createHourZod.shape),
+    async resolve({
+      ctx,
+      input: { hourId, date, description, projectId, tagIds, value, oldTagIds },
+    }) {
+      //! we need to know about the old tagIds so that we diff them, otherwise we can't replace relations looks like...
+      const oldTagIdsSet = new Set(oldTagIds);
+      const tagIdsSet = new Set(tagIds);
+      const disconnect: string[] = [];
+      const connect: string[] = [];
+
+      //? could I do this better without iterating twice?
+      tagIdsSet.forEach((newTid) => {
+        if (!oldTagIdsSet.has(newTid)) connect.push(newTid);
+      });
+      oldTagIdsSet.forEach((oldTid) => {
+        if (!tagIdsSet.has(oldTid)) disconnect.push(oldTid);
+      });
+
+      const edited = await ctx.prisma.hour.update({
+        where: { id: hourId },
+        data: {
+          date,
+          description,
+          projectId,
+          value,
+        },
+      });
+
+      //? wonder whether I could do this properly with the same update transaction rather than have to do it separatedly
+      connect.length &&
+        (await ctx.prisma.hourTag.createMany({
+          data: connect.map((c) => ({ tagId: c, hourId })),
+        }));
+      disconnect.length &&
+        (await ctx.prisma.hourTag.deleteMany({
+          where: {
+            hourId,
+            tagId: {
+              in: disconnect,
+            },
+          },
+        }));
+      return edited;
+    },
+  })
+  .mutation("deleteHour", {
+    input: z.object({ id: z.string() }),
+    async resolve({ ctx, input: { id } }) {
+      return ctx.prisma.hour.delete({ where: { id } });
     },
   })
   .query("tags", {

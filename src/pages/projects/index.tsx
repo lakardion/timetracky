@@ -61,7 +61,7 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
         Name
       </label>
       <Input placeholder="Name" {...register("name")} />
-      <FormValidationError errors={errors} fieldKey="name" />
+      <FormValidationError error={errors.name} />
       <label htmlFor="clientId" className="font-medium">
         Client
       </label>
@@ -83,7 +83,7 @@ const CreateProjectForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
           />
         )}
       />
-      <FormValidationError errors={errors} fieldKey="clientId" />
+      <FormValidationError error={errors.clientId} />
       <section className="flex gap-2">
         <Button
           className="flex-grow"
@@ -135,14 +135,14 @@ const ProjectList = () => {
     );
   }
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-3 justify-center items-center">
       {projects.map((p) => {
         const hoursCount = p.hours?.length ?? 0;
         const hourPlural = "hour" + (hoursCount > 1 ? "s" : "");
         return (
           <li
             key={p.id}
-            className="p-4 border border-solid border-gray-600/50 rounded hover:border-orange-400 flex justify-between"
+            className="p-4 border border-solid border-gray-600/50 rounded hover:border-orange-400 flex justify-between w-full sm:max-w-2xl relative"
           >
             <section aria-label="project name" className="font-medium">
               {p.name}

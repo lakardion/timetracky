@@ -1,3 +1,4 @@
+import { isMatch } from "date-fns";
 import { z } from "zod";
 
 export const createHourZod = z.object({
@@ -8,12 +9,18 @@ export const createHourZod = z.object({
   tagIds: z.array(z.string()),
 });
 export const createHourZodForm = z.object({
-  value: z.string().refine((value) => {
-    if (value === "0") return false;
-    return true;
-  }),
+  value: z
+    .string()
+    .min(1, "Required")
+    .refine((value) => {
+      if (value === "0") return false;
+      return true;
+    }, "Required"),
   projectId: z.string().min(1, "Required"),
-  date: z.string(),
+  date: z.string().refine((date) => {
+    if (!isMatch(date, "yyyy-MM-dd")) return false;
+    return true;
+  }, "Required"),
   description: z.string().min(1, "Required"),
   tagIds: z.array(z.string()),
 });
