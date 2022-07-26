@@ -21,7 +21,7 @@ import { FaEllipsisH } from "react-icons/fa";
 import { MdDeleteOutline, MdOutlineModeEditOutline } from "react-icons/md";
 import ReactSelect from "react-select";
 import { formatDatepicker, parseDatepicker } from "utils/date";
-import { trpc } from "../../utils/trpc";
+import { trpc } from "utils/trpc";
 
 const emptyDefaultValues: Partial<CreateHourFormInputs> = {
   date: formatDatepicker(new Date()),
@@ -359,7 +359,7 @@ const HourList: FC<{
   );
 };
 
-export const Hours = () => {
+const Hours = () => {
   const [page, setPage] = useState(1);
   const { isLoading } = trpc.useQuery(["hours.withTagAndProject", { page }]);
   const { data: projects } = trpc.useQuery(["projects.all"]);
@@ -437,3 +437,5 @@ export const Hours = () => {
     </section>
   );
 };
+
+export default Hours;

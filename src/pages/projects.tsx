@@ -18,7 +18,7 @@ import { MdDeleteOutline, MdOutlineModeEditOutline } from "react-icons/md";
 import ReactSelect from "react-select";
 import { useEntityAwareForm } from "utils/forms";
 import { z } from "zod";
-import { createTRPCVanillaClient, trpc } from "../../utils/trpc";
+import { createTRPCVanillaClient, trpc } from "../utils/trpc";
 import superjson from "superjson";
 
 const placeholderTextClass = "text-gray-400";
@@ -277,7 +277,7 @@ const ProjectList: FC<{
     </ul>
   );
 };
-export const Projects = () => {
+const Projects = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAddProject, setShowAddProject] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState("");
@@ -369,3 +369,5 @@ export const Projects = () => {
     </ProjectsLayout>
   );
 };
+
+export default Projects;
