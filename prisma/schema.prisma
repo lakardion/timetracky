@@ -50,6 +50,7 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    roleType      RoleType  @default(USER)
     accounts      Account[]
     sessions      Session[]
     projects      Project[]
@@ -73,11 +74,12 @@ model Client {
 }
 
 model Project {
-    id        String @id @default(cuid())
+    id        String  @id @default(cuid())
     hours     Hour[]
-    name      String @unique
+    name      String  @unique
     creatorId String
     clientId  String
+    isActive  Boolean @default(true)
 
     client  Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
     creator User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
@@ -113,4 +115,9 @@ model Tag {
     name     String
     isActive Boolean   @default(true)
     hours    HourTag[]
+}
+
+enum RoleType {
+    USER
+    ADMIN
 }
