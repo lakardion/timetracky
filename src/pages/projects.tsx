@@ -143,7 +143,7 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
             onBlur={field.onBlur}
             className="text-black"
             classNamePrefix={"timetracky"}
-            value={clientOptions.find((co) => co.value === field.value)}
+            value={clientOptions.find((co) => co.value === field.value) ?? null}
             onChange={(value) => {
               field.onChange(value?.value);
             }}
