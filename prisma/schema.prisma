@@ -11,10 +11,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id String @id @default(cuid())
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -51,10 +47,11 @@ model User {
     emailVerified DateTime?
     image         String?
     roleType      RoleType  @default(USER)
-    accounts      Account[]
-    sessions      Session[]
-    projects      Project[]
-    hours         Hour[]
+
+    accounts Account[]
+    sessions Session[]
+    projects Project[]
+    hours    Hour[]
 }
 
 model VerificationToken {
@@ -75,12 +72,12 @@ model Client {
 
 model Project {
     id        String  @id @default(cuid())
-    hours     Hour[]
     name      String  @unique
     creatorId String
     clientId  String
     isActive  Boolean @default(true)
 
+    hours   Hour[]
     client  Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
     creator User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 }
