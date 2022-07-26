@@ -286,7 +286,7 @@ const HourList: FC<{
       {paginatedHours.hours?.map((h) => (
         <li
           key={h.id}
-          className={`relative bg-gray-300 w-full rounded-lg max-w-5xl p-3  flex gap-3 ${
+          className={`relative bg-gray-300 w-full rounded-lg max-w-5xl p-3 flex gap-3 ${
             h.id === selectedHourId
               ? "ring-2 ring-orange-300/75 ring-inset"
               : ""
@@ -296,7 +296,7 @@ const HourList: FC<{
         >
           <section
             aria-label="hour and date box"
-            className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg"
+            className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg basis-2/12"
           >
             <h1 className="text-3xl">
               {h.value} <span className="text-sm italic"> hs</span>
@@ -321,7 +321,7 @@ const HourList: FC<{
               {h.description}
             </p>
           </section>
-          <section className="text-xs italic capitalize flex flex-col justify-end">
+          <section className="text-xs italic capitalize flex flex-col justify-end basis-1/12">
             <p>Last updated:</p>
             <p>{formatRelative(new Date(h.updatedAt), new Date())}</p>
           </section>

@@ -50,4 +50,12 @@ export const authRouter = createRouter()
         };
       });
     },
+  })
+  .query("me", {
+    resolve({ ctx }) {
+      //I know this cannot be undefined because we do have session at this point
+      return ctx.prisma.user.findUnique({
+        where: { id: ctx.session!.user!.id },
+      });
+    },
   });

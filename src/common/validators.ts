@@ -1,6 +1,10 @@
 import { isMatch } from "date-fns";
+import { trpc } from "utils/trpc";
 import { z } from "zod";
 
+export const identifiableZod = z.object({
+  id: z.string().min(1, "Required"),
+});
 export const createHourZod = z.object({
   value: z.number().gt(0, "Must be bigger than 0"),
   projectId: z.string().min(1, "Required"),
@@ -31,17 +35,3 @@ export const createTagZod = z.object({
   name: z.string().min(1, "Required"),
 });
 export type CreateTagInputs = z.infer<typeof createTagZod>;
-
-export const createProjectZod = z.object({
-  name: z.string().min(1, "Required"),
-  clientId: z
-    .string()
-    .min(1, "Required")
-    .refine(
-      (data: string) => {
-        return data !== "-1";
-      },
-      { message: "Required" }
-    ),
-});
-export type CreateProjectInputs = z.infer<typeof createProjectZod>;
