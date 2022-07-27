@@ -1,3 +1,4 @@
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateTagInputs, createTagZod } from "common/validators";
 import { Button } from "components/button";
@@ -68,6 +69,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
     onTagDelete(tagId);
   };
   const [hoveringId, setHoveringId] = useState("");
+  const [parent] = useAutoAnimate<HTMLUListElement>();
   if (!tagsWithHour) return null;
   if (!tagsWithHour?.length)
     return <p className="text-base italic pt-3">No tags added yet</p>;
@@ -80,7 +82,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
 
   return (
     <>
-      <ul className="flex flex-wrap gap-3 pt-3">
+      <ul className="flex flex-wrap gap-3 pt-3" ref={parent}>
         {tagsWithHour.map((t) => (
           <li
             className="relative border border-solid border-orange-600/20 shadow-sm py-2 px-4 rounded-l-full rounded-r-full bg-orange-200 "

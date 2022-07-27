@@ -10,3 +10,7 @@
 .hours-container {
   height: calc(100vh - theme("spacing.32"));
 }
+
+.rbc-selected-cell {
+  @apply bg-blue-300/40;
+}

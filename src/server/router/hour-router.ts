@@ -1,3 +1,5 @@
+import { TRPCClientError } from "@trpc/client";
+import { TRPCError } from "@trpc/server";
 import { createHourZod } from "common/validators";
 import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from "utils/pagination";
 import { z } from "zod";
@@ -31,15 +33,35 @@ export const hourRouter = createRouter()
     input: z.object({
       page: z.number().optional(),
       size: z.number().optional(),
+      dateFilter: z
+        .object({
+          from: z.date(),
+          to: z.date(),
+        })
+        .optional()
+        .or(z.date()),
     }),
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
-        return ctx.res?.status(401).json({ message: "Unauthorized" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Need to be signed in to get this information",
+        });
       }
-      const { page = 1, size = DEFAULT_HOURS_PAGE_SIZE } = input;
+      const { page = 1, size = DEFAULT_HOURS_PAGE_SIZE, dateFilter } = input;
+      let dateWhereClause = undefined;
+      if (dateFilter instanceof Date) {
+        dateWhereClause = dateFilter;
+      } else if (dateFilter) {
+        dateWhereClause = {
+          gte: dateFilter.from,
+          lte: dateFilter.to,
+        };
+      }
       const totalHours = await ctx.prisma.hour.count({
         where: {
           userId: ctx.session.user.id,
+          date: dateWhereClause,
         },
       });
       const { count, next, previous } = getPagination({
@@ -47,10 +69,12 @@ export const hourRouter = createRouter()
         size,
         page,
       });
+
       //TODO: might be able to improve this with selections
       const hours = await ctx.prisma?.hour.findMany({
         where: {
           userId: ctx.session?.user?.id,
+          date: dateWhereClause,
         },
         skip: (page - 1) * size,
         take: size,
@@ -154,5 +178,39 @@ export const hourRouter = createRouter()
     input: z.object({ id: z.string() }),
     async resolve({ ctx, input: { id } }) {
       return ctx.prisma.hour.delete({ where: { id } });
+    },
+  })
+  .query("hoursByDate", {
+    input: z.object({
+      dateFrom: z.date(),
+      dateTo: z.date(),
+    }),
+    async resolve({ ctx, input: { dateFrom, dateTo } }) {
+      const currentUser = await ctx.prisma.user.findUnique({
+        where: { id: ctx.session?.user?.id ?? "" },
+      });
+      if (!currentUser) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message:
+            "You must be logged with the same user you are doing the request for",
+        });
+      }
+      const hours = await ctx.prisma.hour.findMany({
+        where: {
+          date: {
+            gte: dateFrom,
+            lte: dateTo,
+          },
+        },
+        include: {
+          project: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      return hours.map((h) => ({ ...h, value: h.value.toNumber() }));
     },
   });

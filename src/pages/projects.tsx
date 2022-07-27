@@ -20,6 +20,7 @@ import { useEntityAwareForm } from "utils/forms";
 import { z } from "zod";
 import { createTRPCVanillaClient, trpc } from "../utils/trpc";
 import superjson from "superjson";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const placeholderTextClass = "text-gray-400";
 
@@ -190,6 +191,8 @@ const ProjectList: FC<{
   const [hoveringId, setHoveringId] = useState("");
   const { data: projects } = trpc.useQuery(["projects.all"]);
 
+  const [parent] = useAutoAnimate<HTMLUListElement>();
+
   if (!projects?.length) {
     return (
       <div className="w-full flex justify-center">
@@ -217,7 +220,10 @@ const ProjectList: FC<{
     setHoveringId("");
   };
   return (
-    <ul className="flex flex-col gap-3 justify-center items-center">
+    <ul
+      className="flex flex-col gap-3 justify-center items-center"
+      ref={parent}
+    >
       {projects.map((p) => {
         const hoursCount = p.hours?.length ?? 0;
         const hourPlural = "h" + (hoursCount > 1 ? "s" : "");

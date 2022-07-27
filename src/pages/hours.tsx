@@ -7,21 +7,38 @@ import {
 import { Button } from "components/button";
 import { ConfirmForm } from "components/confirm-form";
 import { FormValidationError, Input, TextArea } from "components/form";
-import { HoursCalendar } from "components/hour-calendar";
+import {
+  HoursCalendar,
+  RangeChangeEventHandler,
+} from "components/hour-calendar";
 import LongParagraph from "components/long-paragraph";
 import { Modal } from "components/modal";
 import { PillListItem } from "components/pill-list-item";
 import { BackdropSpinner } from "components/tw-spinner";
-import { format, formatRelative } from "date-fns";
+import { format, formatRelative, isDate, isSameDay } from "date-fns";
 import Head from "next/head";
 import Link from "next/link";
-import { FC, MouseEvent, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Event } from "react-big-calendar";
 import { Controller, useForm } from "react-hook-form";
 import { FaEllipsisH } from "react-icons/fa";
 import { MdDeleteOutline, MdOutlineModeEditOutline } from "react-icons/md";
 import ReactSelect from "react-select";
-import { formatDatepicker, parseDatepicker } from "utils/date";
+import { formatDatepicker, localizeUTCDate, parseDatepicker } from "utils/date";
 import { trpc } from "utils/trpc";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
+type DateFilter = {
+  from: Date;
+  to: Date;
+};
 
 const emptyDefaultValues: Partial<CreateHourFormInputs> = {
   date: formatDatepicker(new Date()),
@@ -46,6 +63,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
     trpc.useMutation("hours.create", {
       onSuccess: () => {
         queryClient.invalidateQueries(["hours.withTagAndProject"]);
+        queryClient.invalidateQueries(["hours.hoursByDate"]);
       },
     });
   const { mutateAsync: editHour, isLoading: isHourEditing } = trpc.useMutation(
@@ -114,6 +132,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
       date: parseDatepicker(data.date),
       value: parseFloat(data.value),
     };
+    console.log(JSON.stringify({ parsedData, date: data.date }, undefined, 2));
     hour && hourId
       ? await editHour({
           id: hourId,
@@ -179,7 +198,6 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
           control={control}
           defaultValue={undefined}
           render={({ field }) => {
-            console.log(projectOptions.find((po) => po.value === field.value));
             return (
               <ReactSelect
                 options={projectOptions}
@@ -254,21 +272,26 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
 
 const MAX_TAGS_DISPLAYED = 4;
 
+const getMonthRangeForDate = (date: Date) => {
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return { start: firstDay, end: lastDay };
+};
+
 const HourList: FC<{
   page: number;
   onHourEdit: (id: string) => void;
   onHourDelete: (id: string) => void;
   selectedHourId?: string;
-}> = ({ page, onHourEdit, onHourDelete, selectedHourId }) => {
+  dateFilter?: DateFilter | Date;
+}> = ({ page, onHourEdit, onHourDelete, selectedHourId, dateFilter }) => {
   const { data: paginatedHours } = trpc.useQuery(
-    ["hours.withTagAndProject", { page }],
+    ["hours.withTagAndProject", { page, dateFilter }],
     { keepPreviousData: true }
   );
   const [hoveringId, setHoveringId] = useState("");
 
-  if (!paginatedHours?.hours.length) {
-    return <p className="italic">No hours</p>;
-  }
+  const [parent] = useAutoAnimate<HTMLUListElement>();
 
   const createHoverHandler = (id: string) => (e: MouseEvent) => {
     e?.stopPropagation();
@@ -281,82 +304,102 @@ const HourList: FC<{
     onHourDelete(id);
   };
 
+  const dateFilterParse =
+    dateFilter instanceof Date
+      ? `Filtering for ${format(dateFilter, "MM-dd-yyyy")}`
+      : typeof dateFilter === "object"
+      ? `Filtering from ${format(dateFilter.from, "MM-dd-yyyy")} to ${format(
+          dateFilter.to,
+          "MM-dd-yyyy"
+        )}`
+      : "Last loaded hours";
+
   return (
-    <ul
-      className="w-full flex justify-start items-center flex-col gap-3 md:h-full md:max-w-[700px] overflow-auto"
-      onClick={createHoverHandler("")}
-    >
-      {paginatedHours.hours?.map((h) => (
-        <li
-          key={h.id}
-          className={`relative bg-gray-300 w-full rounded-lg max-w-5xl p-3 flex gap-3 ${
-            h.id === selectedHourId
-              ? "ring-2 ring-orange-300/75 ring-inset"
-              : ""
-          }`}
-          onMouseEnter={createHoverHandler(h.id)}
-          onMouseLeave={createHoverHandler("")}
-        >
-          <section
-            aria-label="hour and date box"
-            className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg basis-2/12"
-          >
-            <h1 className="text-3xl">
-              {h.value} <span className="text-sm italic"> hs</span>
-            </h1>
-            <p aria-label="date" className="italic ">
-              {format(h.date, "M-dd-yyyy")}
-            </p>
-          </section>
-          <section
-            aria-label="project name, tags, and description"
-            className="flex flex-col gap-2 basis-9/12"
-          >
-            <section>
-              <h1 className="text-3xl">{h.project.name}</h1>
-              <ul className="flex flex-wrap gap-3 pt-1">
-                {h.tags.flatMap((t, idx) => {
-                  return <PillListItem content={t.tag.name} key={t.tag.id} />;
-                })}
-              </ul>
-            </section>
-            <LongParagraph charLimit={200}>{h.description}</LongParagraph>
-          </section>
-          <section className="text-xs italic capitalize flex flex-col justify-end basis-1/12">
-            <p>Last updated:</p>
-            <p>{formatRelative(new Date(h.updatedAt), new Date())}</p>
-          </section>
-          {hoveringId === h.id ? (
-            <div
-              className="absolute right-1 top-1 flex gap-1 items-center justify-center rounded"
-              aria-label="hour actions"
+    <>
+      <h1 className="text-2xl pb-2">{dateFilterParse}</h1>
+      <ul
+        className="w-full flex justify-start items-center flex-col gap-3 md:h-full md:max-w-[700px] overflow-auto"
+        onClick={createHoverHandler("")}
+        ref={parent}
+      >
+        {!paginatedHours?.hours.length ? (
+          <p className="italic">No hours</p>
+        ) : (
+          paginatedHours.hours?.map((h) => (
+            <li
+              key={h.id}
+              className={`relative bg-gray-300 w-full rounded-lg max-w-5xl p-3 flex gap-3 ${
+                h.id === selectedHourId
+                  ? "ring-2 ring-orange-300/75 ring-inset"
+                  : ""
+              }`}
+              onMouseEnter={createHoverHandler(h.id)}
+              onMouseLeave={createHoverHandler("")}
             >
-              <button type="button" onClick={createEditHourHandler(h.id)}>
-                <MdOutlineModeEditOutline
-                  className="fill-gray-900 hover:fill-orange-700"
-                  size={28}
-                />
-              </button>
-              <button type="button" onClick={createDeleteHourHandler(h.id)}>
-                <MdDeleteOutline
-                  className="fill-gray-900 hover:fill-orange-700"
-                  size={28}
-                />
-              </button>
-            </div>
-          ) : (
-            <div
-              className="absolute right-3 top-1 sm:hidden"
-              aria-label="display hour actions"
-            >
-              <button type="button" onClick={createHoverHandler(h.id)}>
-                <FaEllipsisH size={15} />
-              </button>
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
+              <section
+                aria-label="hour and date box"
+                className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg basis-2/12"
+              >
+                <h1 className="text-3xl">
+                  {h.value} <span className="text-sm italic"> hs</span>
+                </h1>
+                <p aria-label="date" className="italic ">
+                  {format(h.date, "M-dd-yyyy")}
+                </p>
+              </section>
+              <section
+                aria-label="project name, tags, and description"
+                className="flex flex-col gap-2 basis-9/12"
+              >
+                <section>
+                  <h1 className="text-2xl">{h.project.name}</h1>
+                  <ul className="flex flex-wrap gap-3 pt-1">
+                    {h.tags.flatMap((t, idx) => {
+                      return (
+                        <PillListItem content={t.tag.name} key={t.tag.id} />
+                      );
+                    })}
+                  </ul>
+                </section>
+                <LongParagraph charLimit={200}>{h.description}</LongParagraph>
+              </section>
+              <section className="text-xs italic capitalize flex flex-col justify-end basis-1/12">
+                <p>Last updated:</p>
+                <p>{formatRelative(new Date(h.updatedAt), new Date())}</p>
+              </section>
+              {hoveringId === h.id ? (
+                <div
+                  className="absolute right-1 top-1 flex gap-1 items-center justify-center rounded"
+                  aria-label="hour actions"
+                >
+                  <button type="button" onClick={createEditHourHandler(h.id)}>
+                    <MdOutlineModeEditOutline
+                      className="fill-gray-900 hover:fill-orange-700"
+                      size={28}
+                    />
+                  </button>
+                  <button type="button" onClick={createDeleteHourHandler(h.id)}>
+                    <MdDeleteOutline
+                      className="fill-gray-900 hover:fill-orange-700"
+                      size={28}
+                    />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="absolute right-3 top-1 sm:hidden"
+                  aria-label="display hour actions"
+                >
+                  <button type="button" onClick={createHoverHandler(h.id)}>
+                    <FaEllipsisH size={15} />
+                  </button>
+                </div>
+              )}
+            </li>
+          ))
+        )}
+      </ul>
+    </>
   );
 };
 
@@ -398,6 +441,61 @@ const Hours = () => {
     handleCloseConfirm();
   };
 
+  const [currentCalendarRange, setCurrentCalendarRange] = useState(
+    getMonthRangeForDate(new Date())
+  );
+  const handleRangeChange: RangeChangeEventHandler = (range) => {
+    if (Array.isArray(range)) return; //don't want to address this rn
+    //! range comes UTC-centered so I have to localize that seems like. We only care about what day this happened we don't care what the time was
+    const { end, start } = range;
+    const localizedStart = localizeUTCDate(start);
+    const localizedEnd = localizeUTCDate(end);
+    setCurrentCalendarRange({ start: localizedStart, end: localizedEnd });
+  };
+  const { data: hoursByDate } = trpc.useQuery([
+    "hours.hoursByDate",
+    { dateFrom: currentCalendarRange.start, dateTo: currentCalendarRange.end },
+  ]);
+
+  const events: Event[] = useMemo(
+    () =>
+      hoursByDate?.map(
+        (hbd): Event => ({
+          allDay: true,
+          title: `${hbd.project.name}`,
+          start: hbd.date,
+          end: hbd.date,
+        })
+      ) ?? [],
+    [hoursByDate]
+  );
+  //Calendar controls
+  const [datesSelected, setDatesSelected] = useState<Date[]>([]);
+  const handleDateSelected = useCallback((dates: Date[]) => {
+    setDatesSelected((ds) => {
+      return ds?.length === 1 &&
+        dates.length === 1 &&
+        isSameDay(ds[0]!, dates[0]!)
+        ? []
+        : dates;
+    });
+  }, []);
+
+  const dateFilter: DateFilter | Date | undefined = useMemo(() => {
+    if (!datesSelected?.length) return undefined;
+    if (datesSelected.length === 1) {
+      return datesSelected[0];
+    }
+    return {
+      from: datesSelected[0]!,
+      to: datesSelected[datesSelected.length - 1]!,
+    };
+  }, [datesSelected]);
+
+  useEffect(() => {
+    console.log("datesSelected", datesSelected);
+  }, [datesSelected]);
+
   return (
     <section className="flex flex-col gap-3 lg:flex-row lg:gap-8 lg:justify-around lg:px-4 hours-container">
       <Head>
@@ -410,17 +508,22 @@ const Hours = () => {
           onFinishEdit={handleFinishEdit}
         />
       </section>
-      <section className="flex flex-col gap-2 lg:flex-row-reverse">
+      <section className="flex flex-col gap-2 lg:flex-row-reverse md:flex-grow">
         <section
           aria-label="calendar"
-          className=" lg:basis-6/12 flex justify-center"
+          className=" lg:basis-8/12 flex justify-center"
         >
-          <HoursCalendar events={[]} />
+          <HoursCalendar
+            events={events}
+            onRangeChange={handleRangeChange}
+            onSelectedChange={handleDateSelected}
+            selected={datesSelected}
+          />
         </section>
         {projects?.length ? (
           <section
             aria-label="hours list"
-            className="flex flex-col items-center justify-start relative md:flex-grow"
+            className="flex flex-col items-center justify-start relative md:flex-grow md:basis-4/12"
           >
             <BackdropSpinner isLoading={isLoading} />
             <HourList
@@ -428,6 +531,7 @@ const Hours = () => {
               onHourDelete={onHourDelete}
               onHourEdit={onHourEdit}
               selectedHourId={editingHourId}
+              dateFilter={dateFilter}
             />
           </section>
         ) : null}

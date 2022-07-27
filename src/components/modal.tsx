@@ -51,16 +51,15 @@ export const Modal: FC<{
     <>
       <section
         aria-label="backdrop"
-        className={`absolute  top-0 right-0 h-screen w-screen transition-opacity ease-in duration-200 ${blurOrBackdrop} ${opacityValue}`}
+        className={`absolute  top-0 right-0 h-screen w-screen transition-opacity ease-in duration-200 ${blurOrBackdrop} ${opacityValue} z-10`}
         onClick={onBackdropClick}
       ></section>
       <section
         aria-label="modal body"
-        className={`absolute bg-gray-700 rounded-lg text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-gray-500 p-3 backdrop-blur-3xl  transition-opacity ease-in duration-200 ${opacityValue} ${className}`}
+        className={`absolute bg-gray-700 rounded-lg text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-gray-500 p-3 backdrop-blur-3xl  transition-opacity ease-in duration-200 ${opacityValue} ${className} z-10`}
       >
         {children}
       </section>
-      ,
     </>,
     document.body
   );

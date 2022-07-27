@@ -10,6 +10,7 @@ import { trpc } from "utils/trpc";
 import { z } from "zod";
 import { MdDeleteOutline } from "react-icons/md";
 import { ConfirmForm } from "components/confirm-form";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 type Inputs = {
   name: string;
@@ -107,6 +108,7 @@ const ClientList: FC<{
   const removeHover = () => {
     sethoveringId("");
   };
+  const [parent] = useAutoAnimate<HTMLUListElement>();
   if (!clients && isLoading) {
     return <Spinner />;
   }
@@ -119,7 +121,10 @@ const ClientList: FC<{
   const createClientDeleteHandler = (id: string) => () => onClientDelete(id);
 
   return (
-    <ul className="flex flex-col gap-3 justify-center items-center">
+    <ul
+      className="flex flex-col gap-3 justify-center items-center"
+      ref={parent}
+    >
       {clients.map((c) => {
         const projectsCount = c.projects?.length ?? 0;
         const projectPlural = "project" + (projectsCount > 1 ? "s" : "");

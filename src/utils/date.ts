@@ -12,3 +12,7 @@ export const formatDatepicker = (date?: Date) => {
   if (!date) return "";
   return format(date, "yyyy-MM-dd");
 };
+
+export const localizeUTCDate = (date: Date) => {
+  return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+};
