@@ -132,7 +132,6 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
       date: parseDatepicker(data.date),
       value: parseFloat(data.value),
     };
-    console.log(JSON.stringify({ parsedData, date: data.date }, undefined, 2));
     hour && hourId
       ? await editHour({
           id: hourId,
@@ -162,11 +161,11 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
 
   return (
     <>
-      <BackdropSpinner isLoading={isHourEditing || isHourCreating} />
       <form
-        className="flex flex-col gap-2 bg-gray-700 p-4 pb-5 rounded-lg text-white justify-center"
+        className="relative flex flex-col gap-2 bg-gray-700 p-4 pb-5 rounded-lg text-white justify-center"
         onSubmit={handleSubmit(onSubmit)}
       >
+        <BackdropSpinner isLoading={isHourEditing || isHourCreating} />
         <h1 className="text-2xl text-center">
           {hourId ? "Edit hour entry" : "Add an hour entry"}
         </h1>
@@ -324,80 +323,77 @@ const HourList: FC<{
       >
         {!paginatedHours?.hours.length ? (
           <p className="italic">No hours</p>
-        ) : (
-          paginatedHours.hours?.map((h) => (
-            <li
-              key={h.id}
-              className={`relative bg-gray-300 w-full rounded-lg max-w-5xl p-3 flex gap-3 ${
-                h.id === selectedHourId
-                  ? "ring-2 ring-orange-300/75 ring-inset"
-                  : ""
-              }`}
-              onMouseEnter={createHoverHandler(h.id)}
-              onMouseLeave={createHoverHandler("")}
+        ) : null}
+        {paginatedHours?.hours?.map((h) => (
+          <li
+            key={h.id}
+            className={`relative bg-gray-300 w-full rounded-lg max-w-5xl p-3 flex gap-3 ${
+              h.id === selectedHourId
+                ? "ring-2 ring-orange-300/75 ring-inset"
+                : ""
+            }`}
+            onMouseEnter={createHoverHandler(h.id)}
+            onMouseLeave={createHoverHandler("")}
+          >
+            <section
+              aria-label="hour and date box"
+              className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg basis-2/12"
             >
-              <section
-                aria-label="hour and date box"
-                className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg basis-2/12"
+              <h1 className="text-3xl">
+                {h.value} <span className="text-sm italic"> hs</span>
+              </h1>
+              <p aria-label="date" className="italic ">
+                {format(h.date, "M-dd-yyyy")}
+              </p>
+            </section>
+            <section
+              aria-label="project name, tags, and description"
+              className="flex flex-col gap-2 basis-9/12"
+            >
+              <section>
+                <h1 className="text-2xl">{h.project.name}</h1>
+                <ul className="flex flex-wrap gap-3 pt-1">
+                  {h.tags.flatMap((t, idx) => {
+                    return <PillListItem content={t.tag.name} key={t.tag.id} />;
+                  })}
+                </ul>
+              </section>
+              <LongParagraph charLimit={200}>{h.description}</LongParagraph>
+            </section>
+            <section className="text-xs italic capitalize flex flex-col justify-end basis-1/12">
+              <p>Last updated:</p>
+              <p>{formatRelative(new Date(h.updatedAt), new Date())}</p>
+            </section>
+            {hoveringId === h.id ? (
+              <div
+                className="absolute right-1 top-1 flex gap-1 items-center justify-center rounded"
+                aria-label="hour actions"
               >
-                <h1 className="text-3xl">
-                  {h.value} <span className="text-sm italic"> hs</span>
-                </h1>
-                <p aria-label="date" className="italic ">
-                  {format(h.date, "M-dd-yyyy")}
-                </p>
-              </section>
-              <section
-                aria-label="project name, tags, and description"
-                className="flex flex-col gap-2 basis-9/12"
+                <button type="button" onClick={createEditHourHandler(h.id)}>
+                  <MdOutlineModeEditOutline
+                    className="fill-gray-900 hover:fill-orange-700"
+                    size={28}
+                  />
+                </button>
+                <button type="button" onClick={createDeleteHourHandler(h.id)}>
+                  <MdDeleteOutline
+                    className="fill-gray-900 hover:fill-orange-700"
+                    size={28}
+                  />
+                </button>
+              </div>
+            ) : (
+              <div
+                className="absolute right-3 top-1 sm:hidden"
+                aria-label="display hour actions"
               >
-                <section>
-                  <h1 className="text-2xl">{h.project.name}</h1>
-                  <ul className="flex flex-wrap gap-3 pt-1">
-                    {h.tags.flatMap((t, idx) => {
-                      return (
-                        <PillListItem content={t.tag.name} key={t.tag.id} />
-                      );
-                    })}
-                  </ul>
-                </section>
-                <LongParagraph charLimit={200}>{h.description}</LongParagraph>
-              </section>
-              <section className="text-xs italic capitalize flex flex-col justify-end basis-1/12">
-                <p>Last updated:</p>
-                <p>{formatRelative(new Date(h.updatedAt), new Date())}</p>
-              </section>
-              {hoveringId === h.id ? (
-                <div
-                  className="absolute right-1 top-1 flex gap-1 items-center justify-center rounded"
-                  aria-label="hour actions"
-                >
-                  <button type="button" onClick={createEditHourHandler(h.id)}>
-                    <MdOutlineModeEditOutline
-                      className="fill-gray-900 hover:fill-orange-700"
-                      size={28}
-                    />
-                  </button>
-                  <button type="button" onClick={createDeleteHourHandler(h.id)}>
-                    <MdDeleteOutline
-                      className="fill-gray-900 hover:fill-orange-700"
-                      size={28}
-                    />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className="absolute right-3 top-1 sm:hidden"
-                  aria-label="display hour actions"
-                >
-                  <button type="button" onClick={createHoverHandler(h.id)}>
-                    <FaEllipsisH size={15} />
-                  </button>
-                </div>
-              )}
-            </li>
-          ))
-        )}
+                <button type="button" onClick={createHoverHandler(h.id)}>
+                  <FaEllipsisH size={15} />
+                </button>
+              </div>
+            )}
+          </li>
+        ))}
       </ul>
     </>
   );
