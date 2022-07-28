@@ -82,7 +82,10 @@ const Header = () => {
 
 const NavigationLinkList = () => {
   const { pathname } = useRouter();
-  const { data: user } = trpc.useQuery(["auth.me"]);
+  const { data: session } = trpc.useQuery(["auth.getSession"]);
+  const { data: user } = trpc.useQuery(["auth.me"], {
+    enabled: Boolean(session),
+  });
 
   if (!user) return null;
   return (
