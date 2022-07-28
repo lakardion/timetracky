@@ -22,27 +22,26 @@ const LongParagraph: FC<{ charLimit: number; children: string }> = ({
 
   if (!second) return <p className="text-sm">{first}</p>;
   return (
-    <p className="text-sm">
-      {first}{" "}
+    <>
+      <p className="text-sm max-h-48 overflow-auto">
+        {first} {isExpanded ? second : null}
+      </p>
       {!isExpanded ? (
-        <span
+        <p
           className="text-blue-600 hover:underline hover:cursor-pointer"
           onClick={handleToggleExpand}
         >
           more
-        </span>
+        </p>
       ) : (
-        <>
-          {second}{" "}
-          <span
-            onClick={handleToggleExpand}
-            className="text-blue-600 hover:underline hover:cursor-pointer"
-          >
-            less
-          </span>
-        </>
+        <p
+          onClick={handleToggleExpand}
+          className="text-blue-600 hover:underline hover:cursor-pointer"
+        >
+          less
+        </p>
       )}
-    </p>
+    </>
   );
 };
 export default LongParagraph;

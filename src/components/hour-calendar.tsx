@@ -99,15 +99,11 @@ export const HoursCalendar: FC<{
       () => void
     > = {
       click: () => {
-        console.log("clicked", start);
         handleSelectedChange(slots);
         handleNavigate(start);
       },
-      doubleClick: () => {
-        console.log("doubleClicked");
-      },
+      doubleClick: () => {},
       select: () => {
-        console.log("selected", slotInfo);
         handleSelectedChange(slots);
       },
     };

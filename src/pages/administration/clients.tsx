@@ -4,7 +4,7 @@ import { FormValidationError } from "components/form";
 import { Modal } from "components/modal";
 import { Spinner } from "components/tw-spinner";
 import Head from "next/head";
-import { FC, useState } from "react";
+import { FC, MouseEventHandler, useState } from "react";
 import { useForm } from "react-hook-form";
 import { trpc } from "utils/trpc";
 import { z } from "zod";
@@ -93,6 +93,22 @@ const ClientEditCreateForm: FC<{
   );
 };
 
+const AbsoluteDeleteButton: FC<{
+  isHovering: boolean;
+  onClick: MouseEventHandler;
+}> = ({ isHovering, onClick }) => {
+  return (
+    <button
+      className={`${
+        isHovering ? "" : "hidden"
+      } absolute bg-red-300 border-2 border-solid border-gray-400 rounded-full p-1 -top-3 -right-3`}
+      onClick={onClick}
+    >
+      <MdDeleteOutline size={20} />
+    </button>
+  );
+};
+
 const ClientList: FC<{
   onClientClick: (clientId: string) => void;
   onClientDelete: (clientId: string) => void;
@@ -152,14 +168,10 @@ const ClientList: FC<{
                   : "No projects for this client"}
               </p>
             </button>
-            <button
-              className={`${
-                hoveringId === c.id ? "" : "hidden"
-              } absolute bg-red-300 border-2 border-solid border-gray-400 rounded-full p-1 -top-3 -right-3`}
+            <AbsoluteDeleteButton
               onClick={createClientDeleteHandler(c.id)}
-            >
-              <MdDeleteOutline size={20} />
-            </button>
+              isHovering={hoveringId === c.id}
+            />
           </li>
         );
       })}

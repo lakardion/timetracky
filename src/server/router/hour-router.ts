@@ -69,7 +69,6 @@ export const hourRouter = createRouter()
         size,
         page,
       });
-
       //TODO: might be able to improve this with selections
       const hours = await ctx.prisma?.hour.findMany({
         where: {
@@ -97,6 +96,107 @@ export const hourRouter = createRouter()
         next,
         previous,
       };
+    },
+  })
+  .query("withTagAndProjectInfinite", {
+    input: z.object({
+      dateFilter: z
+        .object({
+          from: z.date(),
+          to: z.date(),
+        })
+        .optional()
+        .or(z.date()),
+      cursor: z.object({ page: z.number() }).default({ page: 1 }),
+      limit: z.number().optional(),
+    }),
+    async resolve({
+      ctx,
+      input: { cursor, limit = DEFAULT_HOURS_PAGE_SIZE, dateFilter },
+    }) {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Need to be signed in to get this information",
+        });
+      }
+      let dateWhereClause = undefined;
+      if (dateFilter instanceof Date) {
+        dateWhereClause = dateFilter;
+      } else if (dateFilter) {
+        dateWhereClause = {
+          gte: dateFilter.from,
+          lte: dateFilter.to,
+        };
+      }
+      const totalHours = await ctx.prisma.hour.count({
+        where: {
+          userId: ctx.session.user.id,
+          date: dateWhereClause,
+        },
+      });
+      //! doing offset pagination here since I don't have a proper cursor to do this and I refuse to set date as a unique field for Hour
+      //TODO: might be able to improve this with selections
+      const hours = await ctx.prisma?.hour.findMany({
+        where: {
+          userId: ctx.session?.user?.id,
+          date: dateWhereClause,
+        },
+        skip: ((cursor.page ?? 1) - 1) * limit,
+        take: limit,
+        include: {
+          project: true,
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+        orderBy: {
+          date: "desc",
+        },
+      });
+      return {
+        hours: hours.map((h) => ({ ...h, value: h.value.toNumber() })),
+        nextCursor:
+          Math.ceil(totalHours / limit) > cursor.page
+            ? { page: cursor.page + 1 }
+            : null,
+      };
+    },
+  })
+  .query("hoursByDate", {
+    input: z.object({
+      dateFrom: z.date(),
+      dateTo: z.date(),
+    }),
+    async resolve({ ctx, input: { dateFrom, dateTo } }) {
+      const currentUser = await ctx.prisma.user.findUnique({
+        where: { id: ctx.session?.user?.id ?? "" },
+      });
+      if (!currentUser) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message:
+            "You must be logged with the same user you are doing the request for",
+        });
+      }
+      const hours = await ctx.prisma.hour.findMany({
+        where: {
+          date: {
+            gte: dateFrom,
+            lte: dateTo,
+          },
+        },
+        include: {
+          project: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      return hours.map((h) => ({ ...h, value: h.value.toNumber() }));
     },
   })
   .mutation("create", {
@@ -178,39 +278,5 @@ export const hourRouter = createRouter()
     input: z.object({ id: z.string() }),
     async resolve({ ctx, input: { id } }) {
       return ctx.prisma.hour.delete({ where: { id } });
-    },
-  })
-  .query("hoursByDate", {
-    input: z.object({
-      dateFrom: z.date(),
-      dateTo: z.date(),
-    }),
-    async resolve({ ctx, input: { dateFrom, dateTo } }) {
-      const currentUser = await ctx.prisma.user.findUnique({
-        where: { id: ctx.session?.user?.id ?? "" },
-      });
-      if (!currentUser) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message:
-            "You must be logged with the same user you are doing the request for",
-        });
-      }
-      const hours = await ctx.prisma.hour.findMany({
-        where: {
-          date: {
-            gte: dateFrom,
-            lte: dateTo,
-          },
-        },
-        include: {
-          project: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-      return hours.map((h) => ({ ...h, value: h.value.toNumber() }));
     },
   });

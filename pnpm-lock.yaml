@@ -6,6 +6,7 @@ specifiers:
   '@hookform/resolvers': ^2.9.6
   '@next-auth/prisma-adapter': ^1.0.3
   '@prisma/client': ^4.1.1
+  '@tanstack/react-virtual': 3.0.0-beta.13
   '@trpc/client': ^9.26.2
   '@trpc/next': ^9.26.2
   '@trpc/react': ^9.26.2
@@ -42,6 +43,7 @@ dependencies:
   '@hookform/resolvers': 2.9.6_react-hook-form@7.33.1
   '@next-auth/prisma-adapter': 1.0.3_vm5ltyyn5wnld7izse4st3auhi
   '@prisma/client': 4.1.1_prisma@4.1.1
+  '@tanstack/react-virtual': 3.0.0-beta.13_react@18.2.0
   '@trpc/client': 9.26.2_@trpc+server@9.26.2
   '@trpc/next': 9.26.2_h3zgstsgkj4vide7rq3ntt2w3e
   '@trpc/react': 9.26.2_4zadt2mtfbx7275mbcwrjz2noe
@@ -643,6 +645,10 @@ packages:
     resolution: {integrity: sha512-DCw8L/SS0IXqmj5IW/fMxOXiifnsfjBzDfRhf0j3NFWqvMCh9OtfjmXQZxVgI2mwvJLc/5jzXhkiWT39qS09dA==}
     requiresBuild: true
 
+  /@reach/observe-rect/1.2.0:
+    resolution: {integrity: sha512-Ba7HmkFgfQxZqqaeIWWkNK0rEhpxVQHIoVyW1YDSkGsGIXzcaW4deC8B0pZrNSSyLTdIk7y+5olKt5+g0GmFIQ==}
+    dev: false
+
   /@restart/hooks/0.4.7_react@18.2.0:
     resolution: {integrity: sha512-ZbjlEHcG+FQtpDPHd7i4FzNNvJf2enAwZfJbpM8CW7BhmOAbsHpZe3tsHwfQUrBuyrxWqPYp2x5UMnilWcY22A==}
     peerDependencies:
@@ -660,6 +666,24 @@ packages:
     resolution: {integrity: sha512-556Az0VX7WR6UdoTn4htt/l3zPQ7bsQWK+HqdG4swV7beUCxo/BqmvbOpUkTIm/9ih86LIf1qsUnywNL3obGHw==}
     dependencies:
       tslib: 2.4.0
+    dev: false
+
+  /@tanstack/react-virtual/3.0.0-beta.13_react@18.2.0:
+    resolution: {integrity: sha512-FDyKbo3ncoOR1rsEURQJ5U+inUV7YC7lcP02Tw5N7oAz/DKWm/uifvWYM7MW0eKSyNCrVPJvlDrgdg0vb7f22Q==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@reach/observe-rect': 1.2.0
+      '@tanstack/virtual-core': 3.0.0-beta.13
+      react: 18.2.0
+    dev: false
+
+  /@tanstack/virtual-core/3.0.0-beta.13:
+    resolution: {integrity: sha512-T7ZwIYYeQEiq0KKYLr0GMQsr4U2VaHXzna3PgooJTh91bEFwDU7bol/1GixCDqLOs+CkjRoVjFdSIo25jgzhnw==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@reach/observe-rect': 1.2.0
     dev: false
 
   /@trpc/client/9.26.2_@trpc+server@9.26.2:
