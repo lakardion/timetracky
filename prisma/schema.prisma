@@ -84,7 +84,7 @@ model Project {
 
 model Hour {
     id          String   @id @default(cuid())
-    date        DateTime @db.Date
+    date        DateTime
     description String
     value       Decimal
     projectId   String
