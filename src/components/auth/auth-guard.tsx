@@ -20,11 +20,6 @@ export const AuthGuard: FC<{
   }
 
   if (!session || !hasProperRole) {
-    console.log("now this happened...", {
-      session,
-      hasProperRole,
-      role: user?.roleType,
-    });
     return <NotFound />;
   }
   return <>{children}</>;

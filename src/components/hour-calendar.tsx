@@ -137,7 +137,9 @@ export const HoursCalendar: FC<{
         startAccessor="start"
         endAccessor="end"
         views={views}
-        className={"h-[300px] w-[300px]  lg:h-[600px] lg:w-full lg:px-3"}
+        className={
+          "h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] 2xl:w-full lg:px-3"
+        }
         onRangeChange={onRangeChange}
         date={value}
         onNavigate={handleNavigate}

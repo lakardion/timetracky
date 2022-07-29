@@ -10,7 +10,6 @@ const AdministrationBreadCrumbs = () => {
   const router = useRouter();
 
   const paths: { href: string; key: string }[] = useMemo(() => {
-    console.log(router.pathname);
     return getBreadcrumbArray(router.pathname);
   }, [router.pathname]);
 
