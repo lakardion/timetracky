@@ -128,7 +128,9 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-3 justify-between flex-grow"
     >
-      <h1 className="text-3xl font-semibold">Create a project</h1>
+      <h1 className="text-3xl font-semibold">
+        {id ? "Edit project" : "Create project"}
+      </h1>
       <label htmlFor="name" className="font-medium">
         Name
       </label>
@@ -164,7 +166,7 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
           isLoading={isCreating || isUpdating}
           disabled={isCreating || isUpdating}
         >
-          Create project
+          {id ? "Edit project" : "Create project"}
         </Button>
         <Button
           className="flex-grow"

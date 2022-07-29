@@ -19,3 +19,14 @@ export const maskEmail = (email: string) => {
   if (!domain) return "";
   return `${maskString(username)}@${maskString(domain)}.${com}`;
 };
+
+export const getBreadcrumbArray = (path: string) => {
+  const [_, ...slugs] = path.split("/");
+  return slugs.flatMap((s, idx, arr) => {
+    const unionPaths = arr.slice(0, idx + 1).join("/");
+    return {
+      href: `/${unionPaths}`,
+      key: s,
+    };
+  });
+};
