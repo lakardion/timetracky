@@ -1,4 +1,3 @@
-import { TRPCClientError } from "@trpc/client";
 import { TRPCError } from "@trpc/server";
 import { createHourZod } from "common/validators";
 import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from "utils/pagination";
@@ -183,6 +182,7 @@ export const hourRouter = createRouter()
       }
       const hours = await ctx.prisma.hour.findMany({
         where: {
+          userId: currentUser.id,
           date: {
             gte: dateFrom,
             lte: dateTo,
