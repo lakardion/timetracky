@@ -21,6 +21,10 @@ import { z } from "zod";
 import { createTRPCVanillaClient, trpc } from "../utils/trpc";
 import superjson from "superjson";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { AuthGuard } from "components/auth/auth-guard";
+import { RoleType } from "@prisma/client";
+import { NextPageWithLayout } from "./_app";
+import { CenteredSpinner } from "components/tw-spinner";
 
 const placeholderTextClass = "text-gray-400";
 
@@ -173,16 +177,6 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
     </form>
   );
 };
-const ProjectsLayout: FC<{ children: ReactNode }> = ({ children }) => {
-  return (
-    <section className="flex flex-col gap-2">
-      <Head>
-        <title>Timetracky - Projects</title>
-      </Head>
-      {children}
-    </section>
-  );
-};
 
 const ProjectList: FC<{
   onEdit: (id: string) => void;
@@ -283,7 +277,7 @@ const ProjectList: FC<{
     </ul>
   );
 };
-const Projects = () => {
+const Projects: NextPageWithLayout = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showAddProject, setShowAddProject] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState("");
@@ -295,7 +289,10 @@ const Projects = () => {
     setShowAddProject(false);
   };
   const queryClient = trpc.useContext();
-  const { data: clients } = trpc.useQuery(["clients.all"]);
+  const { data: clients, isLoading: areClientsLoading } = trpc.useQuery([
+    "clients.all",
+  ]);
+  const { isLoading: areProjectsLoading } = trpc.useQuery(["projects.all"]);
   const {
     mutateAsync: deleteOne,
     isLoading: isDeleting,
@@ -323,9 +320,13 @@ const Projects = () => {
     handleConfirmationClose();
   };
 
+  if (areClientsLoading || areProjectsLoading) {
+    return <CenteredSpinner />;
+  }
+
   if (!clients?.length) {
     return (
-      <ProjectsLayout>
+      <>
         <section>
           <p className="text-center italic text-base">
             No clients found.{" "}
@@ -340,12 +341,12 @@ const Projects = () => {
             are required to create projects
           </p>
         </section>
-      </ProjectsLayout>
+      </>
     );
   }
 
   return (
-    <ProjectsLayout>
+    <>
       <div className="w-full flex justify-center">
         <Button onClick={handleCreateEditOpen}>Add a project</Button>
       </div>
@@ -372,7 +373,20 @@ const Projects = () => {
           />
         </Modal>
       )}
-    </ProjectsLayout>
+    </>
+  );
+};
+
+Projects.getLayout = (page) => {
+  return (
+    <AuthGuard requiredRoles={[RoleType.ADMIN]}>
+      <section className="flex flex-col gap-2">
+        <Head>
+          <title>Timetracky - Projects</title>
+        </Head>
+        {page}
+      </section>
+    </AuthGuard>
   );
 };
 

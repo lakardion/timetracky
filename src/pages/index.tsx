@@ -1,3 +1,4 @@
+import { CenteredSpinner, Spinner } from "components/tw-spinner";
 import type { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -5,8 +6,13 @@ import { useRouter } from "next/router";
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const { data: session } = useSession();
+  const { data: session, isLoading: isSessionLoading } = trpc.useQuery([
+    "auth.getSession",
+  ]);
   const router = useRouter();
+  if (isSessionLoading) {
+    return <CenteredSpinner />;
+  }
   if (!session) {
     return (
       <section className="flex flex-col gap-1 h-full w-full justify-center items-center">
@@ -15,9 +21,8 @@ const Home: NextPage = () => {
       </section>
     );
   } else {
-    //TODO: this is causing a flashing in the screen, need to find a better way to handle this (see #2)
-    router.push("/hours");
-    return <></>;
+    if (router.asPath === "/") router.push("/hours");
+    return <CenteredSpinner />;
   }
 };
 

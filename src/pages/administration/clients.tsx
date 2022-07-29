@@ -11,6 +11,8 @@ import { z } from "zod";
 import { MdDeleteOutline } from "react-icons/md";
 import { ConfirmForm } from "components/confirm-form";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { NextPageWithLayout } from "pages/_app";
+import { getAdministrationLayout } from "components/administration";
 
 type Inputs = {
   name: string;
@@ -179,7 +181,7 @@ const ClientList: FC<{
   );
 };
 
-const Clients = () => {
+const Clients: NextPageWithLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [currentClientId, setCurrentClientId] = useState("");
@@ -262,4 +264,6 @@ const Clients = () => {
     </>
   );
 };
+
+Clients.getLayout = getAdministrationLayout;
 export default Clients;

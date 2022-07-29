@@ -13,6 +13,14 @@ export const Spinner: FC<{
   );
 };
 
+export const CenteredSpinner = () => {
+  return (
+    <section className="flex flex-col justify-center items-center w-full h-full">
+      <Spinner />
+    </section>
+  );
+};
+
 /**
  * The parent of this component should be position-relative otherwise this is not going to work properly. It is based on the position relative of its parent so that it fills all the parent's space to position the loader and backdrop
  * @returns

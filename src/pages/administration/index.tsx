@@ -1,11 +1,17 @@
+import { RoleType } from "@prisma/client";
 import { AdminCard } from "components/admin-card";
+import { getAdministrationLayout } from "components/administration";
+import { AuthGuard } from "components/auth/auth-guard";
+import { Layout } from "components/layout";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { NextPageWithLayout } from "pages/_app";
+import { ReactElement } from "react";
 import { IconType } from "react-icons";
-import { MdBusiness } from "react-icons/md";
 import { BsTags } from "react-icons/bs";
 import { FiUsers } from "react-icons/fi";
+import { MdBusiness } from "react-icons/md";
 
 interface AdminCard {
   title: string;
@@ -33,7 +39,7 @@ const administrationCards: AdminCard[] = [
     icon: FiUsers,
   },
 ];
-const Administration = () => {
+const Administration: NextPageWithLayout = () => {
   const { asPath } = useRouter();
   return (
     <>
@@ -61,4 +67,6 @@ const Administration = () => {
     </>
   );
 };
+Administration.getLayout = getAdministrationLayout;
+
 export default Administration;

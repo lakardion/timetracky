@@ -1,11 +1,13 @@
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateTagInputs, createTagZod } from "common/validators";
+import { getAdministrationLayout } from "components/administration";
 import { Button } from "components/button";
 import { ConfirmForm } from "components/confirm-form";
 import { FormValidationError } from "components/form";
 import { Modal } from "components/modal";
 import Head from "next/head";
+import { NextPageWithLayout } from "pages/_app";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdDeleteOutline } from "react-icons/md";
@@ -108,7 +110,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
   );
 };
 
-const Tags = () => {
+const Tags: NextPageWithLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentTagId, setCurrentTagId] = useState("");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -176,5 +178,7 @@ const Tags = () => {
     </>
   );
 };
+
+Tags.getLayout = getAdministrationLayout;
 
 export default Tags;
