@@ -167,15 +167,15 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
   return (
     <>
       <form
-        className="relative flex flex-col gap-2 bg-gray-700 p-4 pb-5 rounded-lg text-white justify-center"
+        className="relative flex flex-col justify-center gap-2 rounded-lg bg-gray-700 p-4 pb-5 text-white"
         onSubmit={handleSubmit(onSubmit)}
       >
         <BackdropSpinner isLoading={isHourEditing || isHourCreating} />
-        <h1 className="text-2xl text-center">
+        <h1 className="text-center text-2xl">
           {hourId ? "Edit hour entry" : "Add an hour entry"}
         </h1>
-        <section aria-label="hour date" className="flex gap-3 flex-wrap">
-          <div className="flex flex-col gap-2 flex-grow">
+        <section aria-label="hour date" className="flex flex-wrap gap-3">
+          <div className="flex flex-grow flex-col gap-2">
             <label htmlFor="value" className="font-medium">
               Value
             </label>
@@ -186,7 +186,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
             />
             <FormValidationError error={errors.value} />
           </div>
-          <div className="flex flex-col gap-2 flex-grow">
+          <div className="flex flex-grow flex-col gap-2">
             <label htmlFor="date" className="font-medium">
               Date
             </label>
@@ -207,7 +207,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
                 options={projectOptions}
                 ref={field.ref}
                 onBlur={field.onBlur}
-                className="text-black rounded"
+                className="rounded text-black"
                 classNamePrefix="timetracky"
                 value={
                   projectOptions.find((po) => po.value === field.value) ?? null
@@ -254,7 +254,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
           )}
         />
         <FormValidationError error={errors.tagIds} />
-        <section className="p-4 flex justify-center gap-3">
+        <section className="flex justify-center gap-3 p-4">
           <Button
             type="submit"
             isLoading={isHourEditing || isHourCreating}
@@ -369,21 +369,21 @@ const HourList: FC<{
 
   return (
     <>
-      <h1 className="text-2xl pb-2">{dateFilterParse}</h1>
+      <h1 className="pb-2 text-2xl">{dateFilterParse}</h1>
       <section
         aria-label="scrollable hours container"
-        className="w-full h-[700px] 2xl:h-full md:max-w-[700px] overflow-auto"
+        className="h-[700px] w-full overflow-auto md:max-w-[700px] 2xl:h-full"
         ref={rVirtualRef}
       >
         <ul
-          className={`w-full relative`}
+          className={`relative w-full`}
           style={{
             height: `${getTotalSize()}px`,
           }}
           onClick={createHoverHandler("")}
         >
           {!getVirtualItems()?.length ? (
-            <li className="italic text-center pt-3">No hours</li>
+            <li className="pt-3 text-center italic">No hours</li>
           ) : null}
           {getVirtualItems().map((virtualRow) => {
             const isLoaderRow = virtualRow.index > allRows.length - 1;
@@ -410,15 +410,15 @@ const HourList: FC<{
                 ) : (
                   <div
                     aria-label="hour card container"
-                    className={`bg-gray-300 h-[95%] rounded-lg w-[98%] p-3 flex gap-3 ${
+                    className={`flex h-[95%] w-[98%] gap-3 rounded-lg bg-gray-300 p-3 ${
                       h?.id === selectedHourId
-                        ? "ring-2 ring-orange-300/75 ring-inset"
+                        ? "ring-2 ring-inset ring-orange-300/75"
                         : ""
                     }`}
                   >
                     <section
                       aria-label="hour and date box"
-                      className="w-24 h-24 bg-gray-700 flex flex-col items-center justify-between rounded py-3 text-white border-4 border-gray-600 drop-shadow-lg basis-2/12"
+                      className="flex h-24 w-24 basis-2/12 flex-col items-center justify-between rounded border-4 border-gray-600 bg-gray-700 py-3 text-white drop-shadow-lg"
                     >
                       <h1 className="text-3xl">
                         {h!.value} <span className="text-sm italic"> hs</span>
@@ -429,7 +429,7 @@ const HourList: FC<{
                     </section>
                     <section
                       aria-label="project name, tags, and description"
-                      className="flex flex-col gap-2 basis-9/12"
+                      className="flex basis-9/12 flex-col gap-2"
                     >
                       <section>
                         <h1 className="text-2xl">{h!.project.name}</h1>
@@ -448,7 +448,7 @@ const HourList: FC<{
                         {h!.description}
                       </LongParagraph>
                     </section>
-                    <section className="text-xs italic capitalize flex flex-col justify-end basis-1/12">
+                    <section className="flex basis-1/12 flex-col justify-end text-xs capitalize italic">
                       <p>Last updated:</p>
                       <p>
                         {formatRelative(new Date(h!.updatedAt), new Date())}
@@ -456,7 +456,7 @@ const HourList: FC<{
                     </section>
                     {hoveringId === h!.id ? (
                       <div
-                        className="absolute right-4 top-1 flex gap-1 items-center justify-center rounded"
+                        className="absolute right-4 top-1 flex items-center justify-center gap-1 rounded"
                         aria-label="hour actions"
                       >
                         <button
@@ -592,24 +592,24 @@ const Hours = () => {
   }, [datesSelected]);
 
   return (
-    <section className="flex flex-col gap-3 2xl:flex-row 2xl:gap-8 2xl:justify-around 2xl:px-4 hours-container">
+    <section className="hours-container flex flex-col gap-3 2xl:flex-row 2xl:justify-around 2xl:gap-8 2xl:px-4">
       <Head>
         <title>Timetracky - Hours</title>
         <meta name="description" content="Generated by create-t3-app" />
       </Head>
-      <section className="flex justify-center  items-start">
+      <section className="flex items-start  justify-center">
         <CreateEditHour
           hourId={editingHourId}
           onFinishEdit={handleFinishEdit}
         />
       </section>
       <section
-        className="flex flex-col gap-2 lg:flex-row-reverse 2xl:flex-row-reverse md:flex-grow"
+        className="flex flex-col gap-2 md:flex-grow lg:flex-row-reverse 2xl:flex-row-reverse"
         aria-label="hours and calendar container"
       >
         <section
           aria-label="calendar"
-          className=" lg:basis-8/12 flex justify-center"
+          className=" flex justify-center lg:basis-8/12"
         >
           <HoursCalendar
             events={events}
@@ -621,7 +621,7 @@ const Hours = () => {
         {projects?.length ? (
           <section
             aria-label="hours list"
-            className="flex flex-col items-center justify-start relative md:flex-grow md:basis-4/12"
+            className="relative flex flex-col items-center justify-start md:flex-grow md:basis-4/12"
           >
             <BackdropSpinner isLoading={isLoading} />
             <HourList

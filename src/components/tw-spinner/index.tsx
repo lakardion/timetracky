@@ -7,7 +7,7 @@ export const Spinner: FC<{
 }> = ({ sizeClassNames = "w-8 h-8", className = "" }) => {
   return (
     <div
-      className={`${styles["spinner-border"]} animate-spin inline-block border-4 rounded-full ${sizeClassNames} ${className}`}
+      className={`${styles["spinner-border"]} inline-block animate-spin rounded-full border-4 ${sizeClassNames} ${className}`}
       role="status"
     ></div>
   );
@@ -15,7 +15,7 @@ export const Spinner: FC<{
 
 export const CenteredSpinner = () => {
   return (
-    <section className="flex flex-col justify-center items-center w-full h-full">
+    <section className="flex h-full w-full flex-col items-center justify-center">
       <Spinner />
     </section>
   );
@@ -31,9 +31,9 @@ export const BackdropSpinner: FC<{
 }> = ({ isLoading, spinnerSizeClassNames = "w-8 h-8" }) => {
   if (!isLoading) return null;
   return (
-    <div className="absolute w-full h-full flex justify-center items-center">
+    <div className="absolute flex h-full w-full items-center justify-center self-center">
       <div
-        className="w-full h-full bg-gray-300"
+        className="h-full w-full bg-gray-300"
         style={{ opacity: "50%" }}
       ></div>
       <Spinner className="absolute" sizeClassNames={spinnerSizeClassNames} />
