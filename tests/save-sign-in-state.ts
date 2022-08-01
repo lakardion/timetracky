@@ -8,6 +8,7 @@ async function saveSignInState() {
   const parsedUrl = `${
     NODE_ENV === "development" ? "http://" : "https://"
   }${url}`;
+  console.log("visiting url...", parsedUrl);
   await page.goto(parsedUrl);
   //timetracky home
   const loginButton = page.locator("text=Login");
