@@ -11,39 +11,19 @@ import {
   HoursCalendar,
   RangeChangeEventHandler,
 } from "components/hour-calendar";
-import LongParagraph from "components/long-paragraph";
+import { HourList } from "components/hours/hour-list";
+import { DateFilter } from "components/hours/types";
 import { Modal } from "components/modal";
-import { PillListItem } from "components/pill-list-item";
 import { BackdropSpinner } from "components/tw-spinner";
-import { format, formatRelative, isDate, isSameDay } from "date-fns";
+import { isSameDay } from "date-fns";
 import Head from "next/head";
 import Link from "next/link";
-import {
-  FC,
-  MouseEvent,
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Event } from "react-big-calendar";
 import { Controller, useForm } from "react-hook-form";
-import { FaEllipsisH } from "react-icons/fa";
-import { MdDeleteOutline, MdOutlineModeEditOutline } from "react-icons/md";
 import ReactSelect from "react-select";
 import { formatDatepicker, localizeUTCDate, parseDatepicker } from "utils/date";
 import { trpc } from "utils/trpc";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-
-const PARAGRAPH_CHAR_LIMIT = 200;
-
-type DateFilter = {
-  from: Date;
-  to: Date;
-};
 
 const emptyDefaultValues: Partial<CreateHourFormInputs> = {
   date: formatDatepicker(new Date()),
@@ -282,229 +262,7 @@ const getMonthRangeForDate = (date: Date) => {
   return { start: firstDay, end: lastDay };
 };
 
-const HourList: FC<{
-  page: number;
-  onHourEdit: (id: string) => void;
-  onHourDelete: (id: string) => void;
-  selectedHourId?: string;
-  dateFilter?: DateFilter | Date;
-}> = ({ page, onHourEdit, onHourDelete, selectedHourId, dateFilter }) => {
-  const {
-    data: infiniteHours,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = trpc.useInfiniteQuery(
-    [
-      "hours.withTagAndProjectInfinite",
-      {
-        dateFilter,
-      },
-    ],
-    { getNextPageParam: (lastPage) => lastPage.nextCursor }
-  );
-  const [hoveringId, setHoveringId] = useState("");
-
-  const rVirtualRef = useRef<HTMLUListElement | null>(null);
-
-  const allRows = useMemo(() => {
-    return infiniteHours?.pages.flatMap((p) => p.hours) ?? [];
-  }, [infiniteHours?.pages]);
-
-  const { getTotalSize, getVirtualItems } = useVirtualizer({
-    count: hasNextPage ? allRows.length + 1 : allRows.length,
-    getScrollElement: () => rVirtualRef.current,
-    estimateSize: (index) => {
-      return (allRows[index]?.description?.length ?? 0) > 100 ? 250 : 200;
-    },
-    overscan: 5,
-    debug: true,
-  });
-
-  useEffect(() => {
-    const [lastItem] = [...getVirtualItems()].reverse();
-
-    if (!lastItem) {
-      return;
-    }
-
-    if (
-      lastItem.index >= allRows.length - 1 &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
-      fetchNextPage();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    hasNextPage,
-    fetchNextPage,
-    allRows.length,
-    isFetchingNextPage,
-    //! not sure about this. This is how they pictured it in the example at @tanstack/react-virtual
-    getVirtualItems(),
-  ]);
-
-  const createHoverHandler = (id: string) => (e: MouseEvent) => {
-    e?.stopPropagation();
-    setHoveringId(id);
-  };
-  const createEditHourHandler = (id: string) => () => {
-    onHourEdit(id);
-  };
-  const createDeleteHourHandler = (id: string) => () => {
-    onHourDelete(id);
-  };
-
-  const dateFilterParse =
-    dateFilter instanceof Date
-      ? `Filtering for ${format(dateFilter, "MM-dd-yyyy")}`
-      : typeof dateFilter === "object"
-      ? `Filtering from ${format(dateFilter.from, "MM-dd-yyyy")} to ${format(
-          dateFilter.to,
-          "MM-dd-yyyy"
-        )}`
-      : "Last loaded hours";
-
-  return (
-    <>
-      <h1 className="pb-2 text-2xl">{dateFilterParse}</h1>
-      <section
-        aria-label="scrollable hours container"
-        className="h-[700px] w-full overflow-auto md:max-w-[700px] 2xl:h-full"
-        ref={rVirtualRef}
-      >
-        <ul
-          className={`relative w-full`}
-          style={{
-            height: `${getTotalSize()}px`,
-          }}
-          onClick={createHoverHandler("")}
-        >
-          {!getVirtualItems()?.length ? (
-            <li className="pt-3 text-center italic">No hours</li>
-          ) : null}
-          {getVirtualItems().map((virtualRow) => {
-            const isLoaderRow = virtualRow.index > allRows.length - 1;
-            const h = allRows[virtualRow.index];
-            const liClassName = h ? `absolute top-0 left-0 w-full` : "";
-            if (virtualRow.start === undefined) return null;
-            return (
-              <li
-                key={virtualRow.index}
-                className={liClassName}
-                style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-                onMouseEnter={h ? createHoverHandler(h.id) : undefined}
-                onMouseLeave={h ? createHoverHandler("") : undefined}
-              >
-                {isLoaderRow ? (
-                  hasNextPage ? (
-                    "Loading more..."
-                  ) : (
-                    "Nothing more to load"
-                  )
-                ) : (
-                  <div
-                    aria-label="hour card container"
-                    className={`flex h-[95%] w-[98%] gap-3 rounded-lg bg-gray-300 p-3 ${
-                      h?.id === selectedHourId
-                        ? "ring-2 ring-inset ring-orange-300/75"
-                        : ""
-                    }`}
-                  >
-                    <section
-                      aria-label="hour and date box"
-                      className="flex h-24 w-24 basis-2/12 flex-col items-center justify-between rounded border-4 border-gray-600 bg-gray-700 py-3 text-white drop-shadow-lg"
-                    >
-                      <h1 className="text-3xl">
-                        {h!.value} <span className="text-sm italic"> hs</span>
-                      </h1>
-                      <p aria-label="date" className="italic ">
-                        {format(h!.date, "M-dd-yyyy")}
-                      </p>
-                    </section>
-                    <section
-                      aria-label="project name, tags, and description"
-                      className="flex basis-9/12 flex-col gap-2"
-                    >
-                      <section>
-                        <h1 className="text-2xl">{h!.project.name}</h1>
-                        <ul className="flex flex-wrap gap-3 pt-1">
-                          {h!.tags.flatMap((t, idx) => {
-                            return (
-                              <PillListItem
-                                content={t.tag.name}
-                                key={t.tag.id}
-                              />
-                            );
-                          })}
-                        </ul>
-                      </section>
-                      <LongParagraph charLimit={PARAGRAPH_CHAR_LIMIT}>
-                        {h!.description}
-                      </LongParagraph>
-                    </section>
-                    <section className="flex basis-1/12 flex-col justify-end text-xs capitalize italic">
-                      <p>Last updated:</p>
-                      <p>
-                        {formatRelative(new Date(h!.updatedAt), new Date())}
-                      </p>
-                    </section>
-                    {hoveringId === h!.id ? (
-                      <div
-                        className="absolute right-4 top-1 flex items-center justify-center gap-1 rounded"
-                        aria-label="hour actions"
-                      >
-                        <button
-                          type="button"
-                          onClick={createEditHourHandler(h!.id)}
-                        >
-                          <MdOutlineModeEditOutline
-                            className="fill-gray-900 hover:fill-orange-700"
-                            size={28}
-                          />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={createDeleteHourHandler(h!.id)}
-                        >
-                          <MdDeleteOutline
-                            className="fill-gray-900 hover:fill-orange-700"
-                            size={28}
-                          />
-                        </button>
-                      </div>
-                    ) : (
-                      <div
-                        className="absolute right-6 top-4 sm:hidden"
-                        aria-label="display hour actions"
-                      >
-                        <button
-                          type="button"
-                          onClick={createHoverHandler(h!.id)}
-                        >
-                          <FaEllipsisH size={15} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-    </>
-  );
-};
-
 const Hours = () => {
-  const [page, setPage] = useState(1);
-  const { isLoading } = trpc.useQuery(["hours.withTagAndProject", { page }]);
   const { data: projects } = trpc.useQuery(["projects.all"]);
   const [editingHourId, setEditingHourId] = useState("");
   const queryClient = trpc.useContext();
@@ -623,9 +381,7 @@ const Hours = () => {
             aria-label="hours list"
             className="relative flex flex-col items-center justify-start md:flex-grow md:basis-4/12"
           >
-            <BackdropSpinner isLoading={isLoading} />
             <HourList
-              page={page}
               onHourDelete={onHourDelete}
               onHourEdit={onHourEdit}
               selectedHourId={editingHourId}
