@@ -7,9 +7,11 @@ import { hourRouter } from "./hour-router";
 import { projectRouter } from "./project-router";
 import { tagRouter } from "./tag-router";
 import { clientRouter } from "./client-router";
+import { publicRouter } from "./public";
 
 export const appRouter = createRouter()
   .transformer(superjson)
+  .merge("public.", publicRouter)
   .merge("auth.", authRouter)
   .merge("hours.", hourRouter)
   .merge("projects.", projectRouter)

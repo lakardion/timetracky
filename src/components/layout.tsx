@@ -31,7 +31,6 @@ const routes: {
 ];
 
 const LoginActions = () => {
-  const { data: session } = useSession();
   const handleLogin = () => {
     signIn("google");
   };
@@ -43,37 +42,12 @@ const LoginActions = () => {
     // router.push("/profile")
   };
 
-  if (!session) {
-    return <Button onClick={handleLogin}>Login</Button>;
-  }
-
-  return (
-    <section className="flex gap-4 items-center">
-      <div className="inline-flex flex-wrap gap-1 items-center justify-end">
-        <p className="hidden sm:inline-flex">Welcome</p>
-        <button
-          className="hover:text-orange-400 flex items-center gap-1"
-          type="button"
-          onClick={handleGoToProfile}
-        >
-          {session.user?.name}
-          <Image
-            src={session.user?.image ?? ""}
-            width={30}
-            height={30}
-            alt="user image"
-            className="rounded-full"
-          />
-        </button>
-      </div>
-      <Button onClick={handleLogout}>Logout</Button>
-    </section>
-  );
+  return <Button onClick={handleLogin}>Login</Button>;
 };
 
 const Header = () => {
   return (
-    <header className="bg-gray-800 text-white flex justify-between px-3 py-2 items-center">
+    <header className="flex items-center justify-between bg-gray-800 px-3 py-2 text-white">
       <section>Timetracky</section>
       <LoginActions />
     </header>
@@ -82,16 +56,16 @@ const Header = () => {
 
 const NavigationLinkList = () => {
   const { pathname } = useRouter();
-  const { data: session } = trpc.useQuery(["auth.getSession"]);
-  const { data: user } = trpc.useQuery(["auth.me"], {
-    enabled: Boolean(session),
-  });
+  // const { data: session } = trpc.useQuery(["auth.getSession"]);
+  // const { data: user } = trpc.useQuery(["auth.me"], {
+  //   enabled: Boolean(session),
+  // });
 
-  if (!user) return null;
+  // if (!user) return null;
   return (
-    <ul className="flex pl-2 gap-3 py-2">
+    <ul className="flex gap-3 py-2 pl-2">
       {routes.flatMap((r) => {
-        if (r.roleRequired === "ADMIN" && user?.roleType !== "ADMIN") return [];
+        // if (r.roleRequired === "ADMIN" && user?.roleType !== "ADMIN") return [];
         return [
           <Link href={`/${r.href}`} key={r.key}>
             <button
@@ -110,11 +84,6 @@ const NavigationLinkList = () => {
 };
 
 const NavigationBar = () => {
-  const { status, data: session } = useSession();
-  if (status === "loading") {
-    return null;
-  }
-
   return (
     <aside>
       <nav className="bg-gradient-to-b from-gray-800 to-gray-700">
@@ -124,14 +93,17 @@ const NavigationBar = () => {
   );
 };
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  const { data: session } = trpc.useQuery(["auth.getSession"]);
+  // const { data: session } = trpc.useQuery(["auth.getSession"]);
+  const { data: helloworld } = trpc.useQuery(["public.hello-world"]);
 
+  console.log("hellowworld variable", helloworld);
   return (
     <>
       <Header />
       <section>
         <NavigationBar />
-        <main className="p-4">{session ? children : <Home />}</main>
+        {/* <main className="p-4">{session ? children : <Home />}</main> */}
+        <main className="p-4">{<Home />}</main>
       </section>
     </>
   );
