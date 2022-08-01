@@ -1,7 +1,7 @@
 import { chromium, FullConfig } from "@playwright/test";
 
 async function saveSignInState() {
-  const browser = await chromium.launch({ headless: false, slowMo: 100 });
+  const browser = await chromium.launch();
   const page = await browser.newPage();
   const { VERCEL_URL: url, NODE_ENV } = process.env;
   if (!url) throw new Error("Url is not set");
