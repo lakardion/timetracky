@@ -1,24 +1,24 @@
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { trpc } from "utils/trpc";
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { trpc } from 'utils/trpc';
 
 const NotFound = () => {
-  const { data: session } = trpc.useQuery(["auth.getSession"]);
+  const { data: session } = trpc.useQuery(['auth.getSession']);
   const signInToGoogle = () => {
-    signIn("google");
+    signIn('google');
   };
   return (
-    <main className="flex flex-col gap-3 justify-center items-center h-full w-full">
+    <main className="flex h-full w-full flex-col items-center justify-center gap-3">
       <h1 className="text-4xl font-medium">Whoops, nothing around here</h1>
       <div className="flex flex-col gap-2">
         {session ? (
           <Link href="/">
-            <p className="text-blue-600 hover:underline text-xl">Home</p>
+            <p className="text-xl text-blue-600 hover:underline">Home</p>
           </Link>
         ) : (
           <p>
-            You do not appear to be logged in,{" "}
+            You do not appear to be logged in,{' '}
             <button
               className="text-blue-600 hover:underline"
               onClick={signInToGoogle}

@@ -1,17 +1,17 @@
-import { TRPCError } from "@trpc/server";
-import { createHourZod } from "common/validators";
-import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from "utils/pagination";
-import { z } from "zod";
-import { createRouter } from "./context";
+import { TRPCError } from '@trpc/server';
+import { createHourZod } from 'common/validators';
+import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'utils/pagination';
+import { z } from 'zod';
+import { createRouter } from './context';
 
 export const hourRouter = createRouter()
-  .query("single", {
+  .query('single', {
     input: z.object({
       id: z.string(),
     }),
     async resolve({ ctx, input: { id } }) {
       if (!ctx.session?.user?.id) {
-        return ctx.res?.status(401).json({ message: "Unauthorized" });
+        return ctx.res?.status(401).json({ message: 'Unauthorized' });
       }
       const hour = await ctx.prisma.hour.findUnique({
         where: { id },
@@ -28,7 +28,7 @@ export const hourRouter = createRouter()
       return { ...hour, value: hour?.value.toNumber() };
     },
   })
-  .query("withTagAndProject", {
+  .query('withTagAndProject', {
     input: z.object({
       page: z.number().optional(),
       size: z.number().optional(),
@@ -43,8 +43,8 @@ export const hourRouter = createRouter()
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Need to be signed in to get this information",
+          code: 'UNAUTHORIZED',
+          message: 'Need to be signed in to get this information',
         });
       }
       const { page = 1, size = DEFAULT_HOURS_PAGE_SIZE, dateFilter } = input;
@@ -85,7 +85,7 @@ export const hourRouter = createRouter()
           },
         },
         orderBy: {
-          date: "desc",
+          date: 'desc',
         },
       });
       return {
@@ -97,7 +97,7 @@ export const hourRouter = createRouter()
       };
     },
   })
-  .query("withTagAndProjectInfinite", {
+  .query('withTagAndProjectInfinite', {
     input: z.object({
       dateFilter: z
         .object({
@@ -115,8 +115,8 @@ export const hourRouter = createRouter()
     }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Need to be signed in to get this information",
+          code: 'UNAUTHORIZED',
+          message: 'Need to be signed in to get this information',
         });
       }
       let dateWhereClause = undefined;
@@ -152,7 +152,7 @@ export const hourRouter = createRouter()
           },
         },
         orderBy: {
-          date: "desc",
+          date: 'desc',
         },
       });
       return {
@@ -164,20 +164,20 @@ export const hourRouter = createRouter()
       };
     },
   })
-  .query("hoursByDate", {
+  .query('hoursByDate', {
     input: z.object({
       dateFrom: z.date(),
       dateTo: z.date(),
     }),
     async resolve({ ctx, input: { dateFrom, dateTo } }) {
       const currentUser = await ctx.prisma.user.findUnique({
-        where: { id: ctx.session?.user?.id ?? "" },
+        where: { id: ctx.session?.user?.id ?? '' },
       });
       if (!currentUser) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
+          code: 'UNAUTHORIZED',
           message:
-            "You must be logged with the same user you are doing the request for",
+            'You must be logged with the same user you are doing the request for',
         });
       }
       const hours = await ctx.prisma.hour.findMany({
@@ -199,14 +199,14 @@ export const hourRouter = createRouter()
       return hours.map((h) => ({ ...h, value: h.value.toNumber() }));
     },
   })
-  .mutation("create", {
+  .mutation('create', {
     input: createHourZod,
     async resolve({
       ctx,
       input: { date, description, projectId, tagIds, value },
     }) {
       if (!ctx.session?.user?.id) {
-        return ctx.res?.status(401).json({ message: "Unauthorized" });
+        return ctx.res?.status(401).json({ message: 'Unauthorized' });
       }
       const newHour = await ctx.prisma.hour.create({
         data: {
@@ -225,7 +225,7 @@ export const hourRouter = createRouter()
       return newHour;
     },
   })
-  .mutation("edit", {
+  .mutation('edit', {
     input: z
       .object({ id: z.string(), oldTagIds: z.array(z.string()) })
       .extend(createHourZod.shape),
@@ -274,7 +274,7 @@ export const hourRouter = createRouter()
       return edited;
     },
   })
-  .mutation("delete", {
+  .mutation('delete', {
     input: z.object({ id: z.string() }),
     async resolve({ ctx, input: { id } }) {
       return ctx.prisma.hour.delete({ where: { id } });

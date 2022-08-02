@@ -1,15 +1,15 @@
-import { createTagZod } from "common/validators";
-import { z } from "zod";
-import { createRouter } from "./context";
+import { createTagZod } from 'common/validators';
+import { z } from 'zod';
+import { createRouter } from './context';
 
 export const tagRouter = createRouter()
-  .query("all", {
+  .query('all', {
     async resolve({ ctx }) {
       const tags = await ctx.prisma.tag.findMany();
       return tags;
     },
   })
-  .query("withHourCount", {
+  .query('withHourCount', {
     async resolve({ ctx }) {
       //get nested from relation
       const tags = await ctx.prisma.tag.findMany({
@@ -30,7 +30,7 @@ export const tagRouter = createRouter()
       }));
     },
   })
-  .mutation("create", {
+  .mutation('create', {
     input: createTagZod,
     async resolve({ ctx, input: { name } }) {
       const newTag = await ctx.prisma.tag.create({
@@ -39,7 +39,7 @@ export const tagRouter = createRouter()
       return newTag;
     },
   })
-  .mutation("delete", {
+  .mutation('delete', {
     input: z.object({
       tagId: z.string(),
     }),

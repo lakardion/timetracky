@@ -1,12 +1,12 @@
-import { RoleType } from "@prisma/client";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import Home from "pages";
-import { FC, ReactNode } from "react";
-import { trpc } from "utils/trpc";
-import { Button } from "./button";
+import { RoleType } from '@prisma/client';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import Home from 'pages';
+import { FC, ReactNode } from 'react';
+import { trpc } from 'utils/trpc';
+import { Button } from './button';
 
 const routes: {
   key: string;
@@ -14,26 +14,26 @@ const routes: {
   label: string;
   roleRequired: RoleType;
 }[] = [
-  { key: "hours", href: "hours", label: "Hours", roleRequired: "USER" },
+  { key: 'hours', href: 'hours', label: 'Hours', roleRequired: 'USER' },
   {
-    key: "projects",
-    href: "projects",
-    label: "Projects",
-    roleRequired: "ADMIN",
+    key: 'projects',
+    href: 'projects',
+    label: 'Projects',
+    roleRequired: 'ADMIN',
   },
-  { key: "reports", href: "reports", label: "Reports", roleRequired: "ADMIN" },
+  { key: 'reports', href: 'reports', label: 'Reports', roleRequired: 'ADMIN' },
   {
-    key: "admin",
-    href: "administration",
-    label: "Administration",
-    roleRequired: "ADMIN",
+    key: 'admin',
+    href: 'administration',
+    label: 'Administration',
+    roleRequired: 'ADMIN',
   },
 ];
 
 const LoginActions = () => {
   const { data: session } = useSession();
   const handleLogin = () => {
-    signIn("google");
+    signIn('google');
   };
   const handleLogout = () => {
     signOut();
@@ -48,17 +48,17 @@ const LoginActions = () => {
   }
 
   return (
-    <section className="flex gap-4 items-center">
-      <div className="inline-flex flex-wrap gap-1 items-center justify-end">
+    <section className="flex items-center gap-4">
+      <div className="inline-flex flex-wrap items-center justify-end gap-1">
         <p className="hidden sm:inline-flex">Welcome</p>
         <button
-          className="hover:text-orange-400 flex items-center gap-1"
+          className="flex items-center gap-1 hover:text-orange-400"
           type="button"
           onClick={handleGoToProfile}
         >
           {session.user?.name}
           <Image
-            src={session.user?.image ?? ""}
+            src={session.user?.image ?? ''}
             width={30}
             height={30}
             alt="user image"
@@ -73,7 +73,7 @@ const LoginActions = () => {
 
 const Header = () => {
   return (
-    <header className="bg-gray-800 text-white flex justify-between px-3 py-2 items-center">
+    <header className="flex items-center justify-between bg-gray-800 px-3 py-2 text-white">
       <section>Timetracky</section>
       <LoginActions />
     </header>
@@ -82,22 +82,22 @@ const Header = () => {
 
 const NavigationLinkList = () => {
   const { pathname } = useRouter();
-  const { data: session } = trpc.useQuery(["auth.getSession"]);
-  const { data: user } = trpc.useQuery(["auth.me"], {
+  const { data: session } = trpc.useQuery(['auth.getSession']);
+  const { data: user } = trpc.useQuery(['auth.me'], {
     enabled: Boolean(session),
   });
 
   if (!user) return null;
   return (
-    <ul className="flex pl-2 gap-3 py-2">
+    <ul className="flex gap-3 py-2 pl-2">
       {routes.flatMap((r) => {
-        if (r.roleRequired === "ADMIN" && user?.roleType !== "ADMIN") return [];
+        if (r.roleRequired === 'ADMIN' && user?.roleType !== 'ADMIN') return [];
         return [
           <Link href={`/${r.href}`} key={r.key}>
             <button
               type="button"
               className={`text-white hover:text-orange-400 ${
-                pathname.includes("/" + r.href) ? "text-orange-400" : ""
+                pathname.includes('/' + r.href) ? 'text-orange-400' : ''
               }`}
             >
               {r.label}
@@ -111,7 +111,7 @@ const NavigationLinkList = () => {
 
 const NavigationBar = () => {
   const { status, data: session } = useSession();
-  if (status === "loading") {
+  if (status === 'loading') {
     return null;
   }
 
@@ -124,7 +124,7 @@ const NavigationBar = () => {
   );
 };
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  const { data: session } = trpc.useQuery(["auth.getSession"]);
+  const { data: session } = trpc.useQuery(['auth.getSession']);
 
   return (
     <>

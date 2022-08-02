@@ -4,9 +4,9 @@ import {
   Event,
   SlotInfo,
   View,
-} from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, isSameDay } from "date-fns";
-import { enUS } from "date-fns/locale";
+} from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay, isSameDay } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import {
   FC,
   useCallback,
@@ -14,12 +14,12 @@ import {
   useLayoutEffect,
   useMemo,
   useState,
-} from "react";
+} from 'react';
 
 const LG_WIDTH_BREAKPOINT_PX = 1024;
 
 const locales = {
-  "en-US": enUS,
+  'en-US': enUS,
 };
 const localizer = dateFnsLocalizer({
   format,
@@ -39,9 +39,9 @@ function useWindowSize() {
     function updateSize() {
       setSize([window.innerWidth, window.innerHeight]);
     }
-    window.addEventListener("resize", updateSize);
+    window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener("resize", updateSize);
+    return () => window.removeEventListener('resize', updateSize);
   }, []);
   return size;
 }
@@ -95,7 +95,7 @@ export const HoursCalendar: FC<{
   const handleSlotSelect = (slotInfo: SlotInfo) => {
     const { action, start, slots } = slotInfo;
     const callbackByAction: Record<
-      "click" | "doubleClick" | "select",
+      'click' | 'doubleClick' | 'select',
       () => void
     > = {
       click: () => {
@@ -123,8 +123,8 @@ export const HoursCalendar: FC<{
   const dayPropGetter = useCallback(
     (date: Date) => {
       if (selected.some((s) => isSameDay(s, date)))
-        return { className: "bg-orange-300/20" };
-      return { className: "" };
+        return { className: 'bg-orange-300/20' };
+      return { className: '' };
     },
     [selected]
   );
@@ -138,7 +138,7 @@ export const HoursCalendar: FC<{
         endAccessor="end"
         views={views}
         className={
-          "h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] 2xl:w-full lg:px-3"
+          'h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] lg:px-3 2xl:w-full'
         }
         onRangeChange={onRangeChange}
         date={value}

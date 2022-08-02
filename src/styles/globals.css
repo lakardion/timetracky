@@ -1,14 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "react-big-calendar/lib/css/react-big-calendar.css";
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 .timetracky__control.timetracky__control--is-focused {
   @apply shadow-none outline-none ring-2 ring-orange-400;
 }
 
 .hours-container {
-  height: calc(100vh - theme("spacing.32"));
+  height: calc(100vh - theme('spacing.32'));
 }
 
 .rbc-selected-cell {

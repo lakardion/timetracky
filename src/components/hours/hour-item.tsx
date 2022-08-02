@@ -1,9 +1,9 @@
-import LongParagraph from "components/long-paragraph";
-import { PillListItem } from "components/pill-list-item";
-import { format, formatRelative } from "date-fns";
-import { FC, MouseEventHandler } from "react";
-import { FaEllipsisH } from "react-icons/fa";
-import { MdDeleteOutline, MdOutlineModeEditOutline } from "react-icons/md";
+import LongParagraph from 'components/long-paragraph';
+import { PillListItem } from 'components/pill-list-item';
+import { format, formatRelative } from 'date-fns';
+import { FC, MouseEventHandler } from 'react';
+import { FaEllipsisH } from 'react-icons/fa';
+import { MdDeleteOutline, MdOutlineModeEditOutline } from 'react-icons/md';
 
 const PARAGRAPH_CHAR_LIMIT = 200;
 
@@ -60,15 +60,15 @@ export const HourItem: FC<HourItemProps> = ({
     >
       {virtualRow.isLoaderRow ? (
         pagination.hasNextPage ? (
-          "Loading more..."
+          'Loading more...'
         ) : (
-          "Nothing more to load"
+          'Nothing more to load'
         )
       ) : (
         <div
           aria-label="hour card container"
           className={`flex h-[95%] w-[98%] gap-3 rounded-lg bg-gray-300 p-3 ${
-            isSelected ? "ring-2 ring-inset ring-orange-300/75" : ""
+            isSelected ? 'ring-2 ring-inset ring-orange-300/75' : ''
           }`}
         >
           <section
@@ -79,7 +79,7 @@ export const HourItem: FC<HourItemProps> = ({
               {hour.value} <span className="text-sm italic"> hs</span>
             </h1>
             <p aria-label="date" className="italic ">
-              {format(hour.date, "M-dd-yyyy")}
+              {format(hour.date, 'M-dd-yyyy')}
             </p>
           </section>
           <section

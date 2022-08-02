@@ -1,18 +1,18 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateTagInputs, createTagZod } from "common/validators";
-import { getAdministrationLayout } from "components/administration";
-import { Button } from "components/button";
-import { ConfirmForm } from "components/confirm-form";
-import { FormValidationError } from "components/form";
-import { Modal } from "components/modal";
-import Head from "next/head";
-import { NextPageWithLayout } from "pages/_app";
-import { FC, useState } from "react";
-import { useForm } from "react-hook-form";
-import { MdDeleteOutline } from "react-icons/md";
-import { trpc } from "utils/trpc";
-import { z } from "zod";
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CreateTagInputs, createTagZod } from 'common/validators';
+import { getAdministrationLayout } from 'components/administration';
+import { Button } from 'components/button';
+import { ConfirmForm } from 'components/confirm-form';
+import { FormValidationError } from 'components/form';
+import { Modal } from 'components/modal';
+import Head from 'next/head';
+import { NextPageWithLayout } from 'pages/_app';
+import { FC, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { MdDeleteOutline } from 'react-icons/md';
+import { trpc } from 'utils/trpc';
+import { z } from 'zod';
 
 const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
   const {
@@ -24,9 +24,9 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
   });
   const queryClient = trpc.useContext();
 
-  const { isLoading, mutateAsync } = trpc.useMutation("tags.create", {
+  const { isLoading, mutateAsync } = trpc.useMutation('tags.create', {
     onSuccess: () => {
-      queryClient.invalidateQueries(["tags.withHourCount"]);
+      queryClient.invalidateQueries(['tags.withHourCount']);
     },
   });
 
@@ -42,8 +42,8 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
         Name
       </label>
       <input
-        {...register("name")}
-        className="border border-solid border-gray-400 rounded-md px-2 py-1 text-black"
+        {...register('name')}
+        className="rounded-md border border-solid border-gray-400 px-2 py-1 text-black"
       />
       <FormValidationError error={errors.name} />
       <div className="flex gap-3">
@@ -66,20 +66,20 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
 const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
   onTagDelete,
 }) => {
-  const { data: tagsWithHour } = trpc.useQuery(["tags.withHourCount"]);
+  const { data: tagsWithHour } = trpc.useQuery(['tags.withHourCount']);
   const createTagDeleteHandler = (tagId: string) => () => {
     onTagDelete(tagId);
   };
-  const [hoveringId, setHoveringId] = useState("");
+  const [hoveringId, setHoveringId] = useState('');
   const [parent] = useAutoAnimate<HTMLUListElement>();
   if (!tagsWithHour) return null;
   if (!tagsWithHour?.length)
-    return <p className="text-base italic pt-3">No tags added yet</p>;
+    return <p className="pt-3 text-base italic">No tags added yet</p>;
   const createHoverHandler = (id: string) => () => {
     setHoveringId(id);
   };
   const clearHover = () => {
-    setHoveringId("");
+    setHoveringId('');
   };
 
   return (
@@ -87,7 +87,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
       <ul className="flex flex-wrap gap-3 pt-3" ref={parent}>
         {tagsWithHour.map((t) => (
           <li
-            className="relative border border-solid border-orange-600/20 shadow-sm py-2 px-4 rounded-l-full rounded-r-full bg-orange-200 "
+            className="relative rounded-l-full rounded-r-full border border-solid border-orange-600/20 bg-orange-200 py-2 px-4 shadow-sm "
             key={t.id}
             onMouseEnter={createHoverHandler(t.id)}
             onMouseLeave={clearHover}
@@ -97,8 +97,8 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
             </p>
             <button
               className={`${
-                hoveringId === t.id ? "" : "hidden"
-              } absolute bg-red-300 border-2 border-solid border-gray-400 rounded-full p-1 -top-3 -right-3`}
+                hoveringId === t.id ? '' : 'hidden'
+              } absolute -top-3 -right-3 rounded-full border-2 border-solid border-gray-400 bg-red-300 p-1`}
               onClick={createTagDeleteHandler(t.id)}
             >
               <MdDeleteOutline size={18} />
@@ -112,7 +112,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
 
 const Tags: NextPageWithLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentTagId, setCurrentTagId] = useState("");
+  const [currentTagId, setCurrentTagId] = useState('');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const queryClient = trpc.useContext();
@@ -120,11 +120,11 @@ const Tags: NextPageWithLayout = () => {
     isLoading: isDeleting,
     error: deleteError,
     mutateAsync: deleteTag,
-  } = trpc.useMutation("tags.delete", {
+  } = trpc.useMutation('tags.delete', {
     onSuccess: () => {
-      queryClient.invalidateQueries(["tags.all"]);
-      queryClient.invalidateQueries(["tags.withHourCount"]);
-      queryClient.invalidateQueries(["hours.withTagAndProject"]);
+      queryClient.invalidateQueries(['tags.all']);
+      queryClient.invalidateQueries(['tags.withHourCount']);
+      queryClient.invalidateQueries(['hours.withTagAndProject']);
     },
   });
 
@@ -136,7 +136,7 @@ const Tags: NextPageWithLayout = () => {
   };
   const handleConfirmModalClose = () => {
     setIsConfirmModalOpen(false);
-    setCurrentTagId("");
+    setCurrentTagId('');
   };
   const handleOpenConfirmDelete = (tagId: string) => {
     setIsConfirmModalOpen(true);
@@ -153,10 +153,10 @@ const Tags: NextPageWithLayout = () => {
         <title>Timetracky - Tags</title>
         <meta name="description" content="Generated by create-t3-app" />
       </Head>
-      <section aria-label="actions" className="w-full flex justify-center">
+      <section aria-label="actions" className="flex w-full justify-center">
         <Button onClick={handleOpen}>Add a tag</Button>
       </section>
-      <section className="pt-2 flex flex-wrap gap-3 justify-center">
+      <section className="flex flex-wrap justify-center gap-3 pt-2">
         <TagList onTagDelete={handleOpenConfirmDelete} />
       </section>
       {isOpen ? (

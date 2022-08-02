@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { createRouter } from "./context";
+import { z } from 'zod';
+import { createRouter } from './context';
 
 export const clientRouter = createRouter()
-  .query("single", {
+  .query('single', {
     input: z.object({
       clientId: z.string(),
     }),
@@ -15,7 +15,7 @@ export const clientRouter = createRouter()
       return client;
     },
   })
-  .mutation("update", {
+  .mutation('update', {
     input: z.object({
       id: z.string(),
       name: z.string(),
@@ -30,7 +30,7 @@ export const clientRouter = createRouter()
       return updated;
     },
   })
-  .mutation("delete", {
+  .mutation('delete', {
     input: z.object({
       clientId: z.string(),
     }),
@@ -57,7 +57,7 @@ export const clientRouter = createRouter()
       });
     },
   })
-  .query("all", {
+  .query('all', {
     async resolve({ ctx }) {
       const clients = await ctx.prisma.client.findMany({
         include: { projects: true },
@@ -65,7 +65,7 @@ export const clientRouter = createRouter()
       return clients;
     },
   })
-  .mutation("create", {
+  .mutation('create', {
     input: z.object({
       name: z.string(),
     }),

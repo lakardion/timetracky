@@ -1,36 +1,36 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CreateHourFormInputs,
   CreateHourInputs,
   createHourZodForm,
-} from "common/validators";
-import { Button } from "components/button";
-import { ConfirmForm } from "components/confirm-form";
-import { FormValidationError, Input, TextArea } from "components/form";
+} from 'common/validators';
+import { Button } from 'components/button';
+import { ConfirmForm } from 'components/confirm-form';
+import { FormValidationError, Input, TextArea } from 'components/form';
 import {
   HoursCalendar,
   RangeChangeEventHandler,
-} from "components/hour-calendar";
-import { HourList } from "components/hours/hour-list";
-import { DateFilter } from "components/hours/types";
-import { Modal } from "components/modal";
-import { BackdropSpinner } from "components/tw-spinner";
-import { isSameDay } from "date-fns";
-import Head from "next/head";
-import Link from "next/link";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { Event } from "react-big-calendar";
-import { Controller, useForm } from "react-hook-form";
-import ReactSelect from "react-select";
-import { formatDatepicker, localizeUTCDate, parseDatepicker } from "utils/date";
-import { trpc } from "utils/trpc";
+} from 'components/hour-calendar';
+import { HourList } from 'components/hours/hour-list';
+import { DateFilter } from 'components/hours/types';
+import { Modal } from 'components/modal';
+import { BackdropSpinner } from 'components/tw-spinner';
+import { isSameDay } from 'date-fns';
+import Head from 'next/head';
+import Link from 'next/link';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { Event } from 'react-big-calendar';
+import { Controller, useForm } from 'react-hook-form';
+import ReactSelect from 'react-select';
+import { formatDatepicker, localizeUTCDate, parseDatepicker } from 'utils/date';
+import { trpc } from 'utils/trpc';
 
 const emptyDefaultValues: Partial<CreateHourFormInputs> = {
   date: formatDatepicker(new Date()),
-  description: "",
+  description: '',
   projectId: undefined,
   tagIds: [],
-  value: "0",
+  value: '0',
 };
 
 const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
@@ -39,27 +39,27 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
 }) => {
   //todo: might need to define pagination?. These could go wild otherwise
   //todo I think I might have to kick off this to the react select components rather
-  const { data: projects } = trpc.useQuery(["projects.all"]);
-  const { data: tags } = trpc.useQuery(["tags.all"]);
+  const { data: projects } = trpc.useQuery(['projects.all']);
+  const { data: tags } = trpc.useQuery(['tags.all']);
 
   const queryClient = trpc.useContext();
 
   const { mutateAsync: createHour, isLoading: isHourCreating } =
-    trpc.useMutation("hours.create", {
+    trpc.useMutation('hours.create', {
       onSuccess: () => {
-        queryClient.invalidateQueries(["hours.withTagAndProjectInfinite"]);
-        queryClient.invalidateQueries(["hours.hoursByDate"]);
+        queryClient.invalidateQueries(['hours.withTagAndProjectInfinite']);
+        queryClient.invalidateQueries(['hours.hoursByDate']);
       },
     });
   const { mutateAsync: editHour, isLoading: isHourEditing } = trpc.useMutation(
-    "hours.edit",
+    'hours.edit',
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["hours.withTagAndProjectInfinite"]);
+        queryClient.invalidateQueries(['hours.withTagAndProjectInfinite']);
       },
     }
   );
-  const { data: hour } = trpc.useQuery(["hours.single", { id: hourId ?? "" }], {
+  const { data: hour } = trpc.useQuery(['hours.single', { id: hourId ?? '' }], {
     enabled: Boolean(hourId),
   });
 
@@ -130,7 +130,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
   if (!projects?.length) {
     return (
       <p className="italic">
-        There are no projects created, go to{" "}
+        There are no projects created, go to{' '}
         <Link href="/projects">
           <button
             type="button"
@@ -138,7 +138,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
           >
             Projects
           </button>
-        </Link>{" "}
+        </Link>{' '}
         and add one
       </p>
     );
@@ -152,7 +152,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
       >
         <BackdropSpinner isLoading={isHourEditing || isHourCreating} />
         <h1 className="text-center text-2xl">
-          {hourId ? "Edit hour entry" : "Add an hour entry"}
+          {hourId ? 'Edit hour entry' : 'Add an hour entry'}
         </h1>
         <section aria-label="hour date" className="flex flex-wrap gap-3">
           <div className="flex flex-grow flex-col gap-2">
@@ -161,7 +161,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
             </label>
             <Input
               type="number"
-              {...register("value")}
+              {...register('value')}
               placeholder="Value..."
             />
             <FormValidationError error={errors.value} />
@@ -170,7 +170,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
             <label htmlFor="date" className="font-medium">
               Date
             </label>
-            <Input type="date" {...register("date")} />
+            <Input type="date" {...register('date')} />
             <FormValidationError error={errors.date} />
           </div>
         </section>
@@ -205,7 +205,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
           Description
         </label>
         <TextArea
-          {...register("description")}
+          {...register('description')}
           placeholder="Describe the activity..."
           className="flex-grow"
         />
@@ -240,13 +240,13 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
             isLoading={isHourEditing || isHourCreating}
             className="flex-grow"
           >
-            {hourId ? "Edit" : "Add"}
+            {hourId ? 'Edit' : 'Add'}
           </Button>
           <Button
             className="flex-grow capitalize"
             onClick={isDirty ? () => reset() : handleClose}
           >
-            {isDirty ? "reset" : "cancel"}
+            {isDirty ? 'reset' : 'cancel'}
           </Button>
         </section>
       </form>
@@ -263,19 +263,19 @@ const getMonthRangeForDate = (date: Date) => {
 };
 
 const Hours = () => {
-  const { data: projects } = trpc.useQuery(["projects.all"]);
-  const [editingHourId, setEditingHourId] = useState("");
+  const { data: projects } = trpc.useQuery(['projects.all']);
+  const [editingHourId, setEditingHourId] = useState('');
   const queryClient = trpc.useContext();
   const {
     mutateAsync: deleteOne,
     isLoading: isDeleting,
     error: deleteError,
-  } = trpc.useMutation("hours.delete", {
+  } = trpc.useMutation('hours.delete', {
     onSuccess: () => {
-      queryClient.invalidateQueries("hours.withTagAndProjectInfinite");
+      queryClient.invalidateQueries('hours.withTagAndProjectInfinite');
     },
   });
-  const [deletingHourId, setDeletingHourId] = useState("");
+  const [deletingHourId, setDeletingHourId] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   const onHourEdit = (id: string) => {
@@ -286,12 +286,12 @@ const Hours = () => {
     setShowConfirmationModal(true);
   };
   const handleFinishEdit = () => {
-    if (editingHourId) setEditingHourId("");
+    if (editingHourId) setEditingHourId('');
   };
 
   const handleCloseConfirm = () => {
     setShowConfirmationModal(false);
-    setDeletingHourId("");
+    setDeletingHourId('');
   };
   const handleSubmitDelete = async () => {
     await deleteOne({ id: deletingHourId });
@@ -310,7 +310,7 @@ const Hours = () => {
     setCurrentCalendarRange({ start: localizedStart, end: localizedEnd });
   };
   const { data: hoursByDate } = trpc.useQuery([
-    "hours.hoursByDate",
+    'hours.hoursByDate',
     { dateFrom: currentCalendarRange.start, dateTo: currentCalendarRange.end },
   ]);
 

@@ -1,17 +1,17 @@
-import { FC, ReactNode, useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import { FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const useBrowserAwareBackdrop = () => {
-  const [blurOrBackdrop, setBlurOrBackdrop] = useState("");
+  const [blurOrBackdrop, setBlurOrBackdrop] = useState('');
 
   useEffect(() => {
     // for some reason firefox does not support backdrop blur
     //needed to do this within client else window is possibly undefined
     const agent = window.navigator.userAgent;
-    const isFirefox = agent.indexOf("Firefox") !== -1;
+    const isFirefox = agent.indexOf('Firefox') !== -1;
     const blurOrBackdrop = isFirefox
-      ? "bg-gray-300/50"
-      : "bg-transparent backdrop-blur-sm";
+      ? 'bg-gray-300/50'
+      : 'bg-transparent backdrop-blur-sm';
     setBlurOrBackdrop(blurOrBackdrop);
   }, []);
 
@@ -29,7 +29,7 @@ const useFadeAfterRender = () => {
   }, []);
 
   const stableOpacity = useMemo(
-    () => (hasFaded ? "opacity-100" : "opacity-0"),
+    () => (hasFaded ? 'opacity-100' : 'opacity-0'),
     [hasFaded]
   );
 
@@ -43,7 +43,7 @@ export const Modal: FC<{
   onBackdropClick: () => void;
   children: ReactNode;
   className?: string;
-}> = ({ onBackdropClick, className = "", children }) => {
+}> = ({ onBackdropClick, className = '', children }) => {
   const blurOrBackdrop = useBrowserAwareBackdrop();
   const opacityValue = useFadeAfterRender();
 
@@ -51,12 +51,12 @@ export const Modal: FC<{
     <>
       <section
         aria-label="backdrop"
-        className={`absolute  top-0 right-0 h-screen w-screen transition-opacity ease-in duration-200 ${blurOrBackdrop} ${opacityValue} z-10`}
+        className={`absolute  top-0 right-0 h-screen w-screen transition-opacity duration-200 ease-in ${blurOrBackdrop} ${opacityValue} z-10`}
         onClick={onBackdropClick}
       ></section>
       <section
         aria-label="modal body"
-        className={`absolute bg-gray-700 rounded-lg text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-gray-500 p-3 backdrop-blur-3xl  transition-opacity ease-in duration-200 ${opacityValue} ${className} z-10`}
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-gray-500 bg-gray-700 p-3 text-white backdrop-blur-3xl  transition-opacity duration-200 ease-in ${opacityValue} ${className} z-10`}
       >
         {children}
       </section>

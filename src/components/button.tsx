@@ -1,5 +1,5 @@
-import { ButtonHTMLAttributes, FC, ReactNode } from "react";
-import { Spinner } from "./tw-spinner";
+import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
+import { Spinner } from './tw-spinner';
 
 export const Button: FC<
   ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -14,10 +14,10 @@ export const Button: FC<
       className={
         overrides?.className
           ? overrides.className
-          : "bg-orange-400 rounded px-2 py-0.5 hover:bg-orange-700 text-white flex items-center justify-center " +
-            (props.className ?? "")
+          : 'flex items-center justify-center rounded bg-orange-400 px-2 py-0.5 text-white hover:bg-orange-700 ' +
+            (props.className ?? '')
       }
-      type={props.type ? props.type : "button"}
+      type={props.type ? props.type : 'button'}
     >
       {isLoading ? (
         <Spinner sizeClassNames={spinnerSizeClassNames} />

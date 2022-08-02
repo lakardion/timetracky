@@ -1,4 +1,4 @@
-import { FieldError, Merge } from "react-hook-form";
+import { FieldError, Merge } from 'react-hook-form';
 
 export const FormValidationError = ({
   error,
@@ -7,11 +7,11 @@ export const FormValidationError = ({
 }) => {
   if (Array.isArray(error))
     return (
-      <p className="text-red-500 font-medium">
-        {error.flatMap((e) => (e?.message ? [e.message] : [])).join(" ") ?? ""}
+      <p className="font-medium text-red-500">
+        {error.flatMap((e) => (e?.message ? [e.message] : [])).join(' ') ?? ''}
       </p>
     );
   return error?.message ? (
-    <p className="text-red-500 font-medium">{error.message ?? ""}</p>
+    <p className="font-medium text-red-500">{error.message ?? ''}</p>
   ) : null;
 };

@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { IconType } from "react-icons";
+import { FC } from 'react';
+import { IconType } from 'react-icons';
 
 interface AdminCardProps {
   title: string;
@@ -12,13 +12,13 @@ export const AdminCard: FC<AdminCardProps> = ({
   icon: Icon,
 }) => {
   return (
-    <article className="bg-orange-300 shadow-gray-500 shadow-md p-4 rounded-lg w-60 h-32 flex">
+    <article className="flex h-32 w-60 rounded-lg bg-orange-300 p-4 shadow-md shadow-gray-500">
       <section aria-label="icon">
         <Icon size="2em" />
       </section>
       <section
         aria-label="card details"
-        className="flex flex-col gap-1 align-baseline text-left pl-2 text-sm"
+        className="flex flex-col gap-1 pl-2 text-left align-baseline text-sm"
       >
         <h1 className="text-2xl">{title}</h1>
         <p>{description}</p>

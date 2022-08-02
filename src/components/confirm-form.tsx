@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { Button } from "./button";
+import { FC } from 'react';
+import { Button } from './button';
 
 export const ConfirmForm: FC<{
   body: string;
@@ -9,9 +9,9 @@ export const ConfirmForm: FC<{
   isConfirming?: boolean;
 }> = ({ onConfirm, onCancel, body, errorMessage, isConfirming }) => {
   return (
-    <section className="p-3 flex flex-col gap-3">
-      <h1 className="text-3xl text-center">Are you sure?</h1>
-      <p className="text-sm text-center">{body}</p>
+    <section className="flex flex-col gap-3 p-3">
+      <h1 className="text-center text-3xl">Are you sure?</h1>
+      <p className="text-center text-sm">{body}</p>
       <section aria-label="action buttons" className="flex gap-3">
         <Button
           onClick={onConfirm}
@@ -26,7 +26,7 @@ export const ConfirmForm: FC<{
         </Button>
       </section>
       {errorMessage ? (
-        <p className="text-red-500 font-medium">{errorMessage}</p>
+        <p className="font-medium text-red-500">{errorMessage}</p>
       ) : null}
     </section>
   );

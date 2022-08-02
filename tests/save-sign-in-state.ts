@@ -23,7 +23,7 @@ async function saveSignInState() {
   const passwordInput = page.locator('input[type="password"]');
   await passwordInput.fill(password);
   await passwordInput.press('Enter');
-      await page.context().storageState({ path: './tests/storageState.json' });
+  await page.context().storageState({ path: './tests/storageState.json' });
   await browser.close();
 }
 

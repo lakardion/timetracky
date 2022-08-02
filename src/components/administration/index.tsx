@@ -1,10 +1,10 @@
-import { RoleType } from "@prisma/client";
-import { AuthGuard } from "components/auth/auth-guard";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { ReactElement, useMemo } from "react";
-import { getBreadcrumbArray } from "utils";
-import { MdKeyboardArrowRight } from "react-icons/md";
+import { RoleType } from '@prisma/client';
+import { AuthGuard } from 'components/auth/auth-guard';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { ReactElement, useMemo } from 'react';
+import { getBreadcrumbArray } from 'utils';
+import { MdKeyboardArrowRight } from 'react-icons/md';
 
 const AdministrationBreadCrumbs = () => {
   const router = useRouter();
@@ -18,9 +18,9 @@ const AdministrationBreadCrumbs = () => {
   return (
     <section
       aria-label="breadcrumbs"
-      className="w-full bg-gray-200 -mt-4 rounded-bl-lg rounded-br-lg"
+      className="-mt-4 w-full rounded-bl-lg rounded-br-lg bg-gray-200"
     >
-      <ul className="flex gap-3 justify-start items-center p-3">
+      <ul className="flex items-center justify-start gap-3 p-3">
         {paths.map((p, idx) => (
           <>
             <li key={idx}>
@@ -29,7 +29,7 @@ const AdministrationBreadCrumbs = () => {
               ) : (
                 <>
                   <Link href={p.href}>
-                    <p className="hover:cursor-pointer hover:underline capitalize text-blue-600">
+                    <p className="capitalize text-blue-600 hover:cursor-pointer hover:underline">
                       {p.key}
                     </p>
                   </Link>

@@ -1,11 +1,11 @@
-import { getAdministrationLayout } from "components/administration";
-import Head from "next/head";
-import Image from "next/image";
-import { NextPageWithLayout } from "pages/_app";
-import { trpc } from "utils/trpc";
+import { getAdministrationLayout } from 'components/administration';
+import Head from 'next/head';
+import Image from 'next/image';
+import { NextPageWithLayout } from 'pages/_app';
+import { trpc } from 'utils/trpc';
 
 const Users: NextPageWithLayout = () => {
-  const { data: users } = trpc.useQuery(["auth.getUsers"]);
+  const { data: users } = trpc.useQuery(['auth.getUsers']);
 
   if (!users) {
     return <></>;
@@ -21,22 +21,22 @@ const Users: NextPageWithLayout = () => {
           const userExtraInfo =
             u.projectCount && u.hourCount
               ? `${u.hourCount} hours across ${u.projectCount} projects`
-              : "No hours registered yet";
+              : 'No hours registered yet';
           return (
             <li
               key={u.id}
-              className="flex bg-slate-400 w-80 p-4 rounded-lg gap-3"
+              className="flex w-80 gap-3 rounded-lg bg-slate-400 p-4"
             >
-              <section className="rounded-full border border-solid bg-black/40 border-gray-400/30">
+              <section className="rounded-full border border-solid border-gray-400/30 bg-black/40">
                 <Image
-                  src={u.image ?? ""}
+                  src={u.image ?? ''}
                   alt="User image"
                   height={100}
                   width={100}
                   className="rounded-full"
                 />
               </section>
-              <section className="flex flex-col gap-2 items-center">
+              <section className="flex flex-col items-center gap-2">
                 <h1 className="text-2xl font-medium">{u.name}</h1>
                 <p className="text-sm">{u.maskedEmail}</p>
                 {userExtraInfo ? (

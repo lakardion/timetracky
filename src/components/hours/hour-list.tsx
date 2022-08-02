@@ -1,9 +1,9 @@
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { format } from "date-fns";
-import { FC, MouseEvent, useEffect, useMemo, useRef, useState } from "react";
-import { trpc } from "utils/trpc";
-import { HourItem } from "./hour-item";
-import { DateFilter } from "./types";
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { format } from 'date-fns';
+import { FC, MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { trpc } from 'utils/trpc';
+import { HourItem } from './hour-item';
+import { DateFilter } from './types';
 
 const useVirtualizedInfiniteHourList = (dateFilter?: DateFilter | Date) => {
   const {
@@ -13,7 +13,7 @@ const useVirtualizedInfiniteHourList = (dateFilter?: DateFilter | Date) => {
     isFetchingNextPage,
   } = trpc.useInfiniteQuery(
     [
-      "hours.withTagAndProjectInfinite",
+      'hours.withTagAndProjectInfinite',
       {
         dateFilter,
       },
@@ -79,7 +79,7 @@ export const HourList: FC<{
   selectedHourId?: string;
   dateFilter?: DateFilter | Date;
 }> = ({ onHourEdit, onHourDelete, selectedHourId, dateFilter }) => {
-  const [hoveringId, setHoveringId] = useState("");
+  const [hoveringId, setHoveringId] = useState('');
 
   const { allRows, getTotalSize, getVirtualItems, hasNextPage, rVirtualRef } =
     useVirtualizedInfiniteHourList(dateFilter);
@@ -97,13 +97,13 @@ export const HourList: FC<{
 
   const dateFilterParse =
     dateFilter instanceof Date
-      ? `Filtering for ${format(dateFilter, "MM-dd-yyyy")}`
-      : typeof dateFilter === "object"
-      ? `Filtering from ${format(dateFilter.from, "MM-dd-yyyy")} to ${format(
+      ? `Filtering for ${format(dateFilter, 'MM-dd-yyyy')}`
+      : typeof dateFilter === 'object'
+      ? `Filtering from ${format(dateFilter.from, 'MM-dd-yyyy')} to ${format(
           dateFilter.to,
-          "MM-dd-yyyy"
+          'MM-dd-yyyy'
         )}`
-      : "Last loaded hours";
+      : 'Last loaded hours';
 
   return (
     <>
@@ -118,7 +118,7 @@ export const HourList: FC<{
           style={{
             height: `${getTotalSize()}px`,
           }}
-          onClick={createHoverHandler("")}
+          onClick={createHoverHandler('')}
         >
           {!getVirtualItems()?.length ? (
             <li className="pt-3 text-center italic">No hours</li>
@@ -126,7 +126,7 @@ export const HourList: FC<{
           {getVirtualItems().map((virtualRow) => {
             const isLoaderRow = virtualRow.index > allRows.length - 1;
             const h = allRows[virtualRow.index];
-            const liClassName = h ? `absolute top-0 left-0 w-full` : "";
+            const liClassName = h ? `absolute top-0 left-0 w-full` : '';
             if (virtualRow.start === undefined || !h) return null;
             return (
               <HourItem
@@ -137,7 +137,7 @@ export const HourList: FC<{
                 hoverHandlers={{
                   isHovering: hoveringId === h?.id,
                   onMouseEnter: h ? createHoverHandler(h.id) : undefined,
-                  onMouseLeave: h ? createHoverHandler("") : undefined,
+                  onMouseLeave: h ? createHoverHandler('') : undefined,
                 }}
                 pagination={{
                   hasNextPage,

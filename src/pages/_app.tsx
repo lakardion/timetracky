@@ -1,16 +1,16 @@
 // src/pages/_app.tsx
-import { withTRPC } from "@trpc/next";
-import type { AppRouter } from "../server/router";
-import type { AppType } from "next/dist/shared/lib/utils";
-import superjson from "superjson";
-import { SessionProvider } from "next-auth/react";
-import "../styles/globals.css";
-import { Layout } from "../components/layout";
-import Head from "next/head";
-import { getBaseUrl } from "utils/url";
-import { NextPage } from "next";
-import { ReactElement, ReactNode } from "react";
-import { AppProps } from "next/app";
+import { withTRPC } from '@trpc/next';
+import type { AppRouter } from '../server/router';
+import type { AppType } from 'next/dist/shared/lib/utils';
+import superjson from 'superjson';
+import { SessionProvider } from 'next-auth/react';
+import '../styles/globals.css';
+import { Layout } from '../components/layout';
+import Head from 'next/head';
+import { getBaseUrl } from 'utils/url';
+import { NextPage } from 'next';
+import { ReactElement, ReactNode } from 'react';
+import { AppProps } from 'next/app';
 
 export type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;

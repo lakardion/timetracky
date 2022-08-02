@@ -1,13 +1,13 @@
-import { FC, ForwardedRef, forwardRef, SelectHTMLAttributes } from "react";
+import { FC, ForwardedRef, forwardRef, SelectHTMLAttributes } from 'react';
 
 export const Select: FC<SelectHTMLAttributes<HTMLSelectElement>> = forwardRef(
   (
-    { children, className = "", ...props },
+    { children, className = '', ...props },
     ref: ForwardedRef<HTMLSelectElement>
   ) => (
     <select
       {...props}
-      className={`${className} border border-solid border-gray-400 rounded-md px-2 py-1 text-black h-9 placeholder:text-gray-500/80`}
+      className={`${className} h-9 rounded-md border border-solid border-gray-400 px-2 py-1 text-black placeholder:text-gray-500/80`}
       ref={ref}
     >
       {children}
@@ -15,4 +15,4 @@ export const Select: FC<SelectHTMLAttributes<HTMLSelectElement>> = forwardRef(
   )
 );
 
-Select.displayName = "Select";
+Select.displayName = 'Select';

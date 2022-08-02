@@ -1,10 +1,10 @@
-import { TRPCError } from "@trpc/server";
-import { identifiableZod } from "common/validators";
-import { z } from "zod";
-import { createRouter } from "./context";
+import { TRPCError } from '@trpc/server';
+import { identifiableZod } from 'common/validators';
+import { z } from 'zod';
+import { createRouter } from './context';
 
 export const projectRouter = createRouter()
-  .query("exists", {
+  .query('exists', {
     input: z.object({ search: z.string() }),
     async resolve({ ctx, input: { search } }) {
       const existingProject = await ctx.prisma.project.findUnique({
@@ -16,37 +16,37 @@ export const projectRouter = createRouter()
       return false;
     },
   })
-  .query("single", {
+  .query('single', {
     input: identifiableZod,
     async resolve({ ctx, input: { id } }) {
       const project = await ctx.prisma.project.findUnique({ where: { id } });
       if (!project)
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "The project you tried to get was not found",
+          code: 'NOT_FOUND',
+          message: 'The project you tried to get was not found',
         });
       return project;
     },
   })
-  .query("all", {
+  .query('all', {
     async resolve({ ctx }) {
       const projects = await ctx.prisma.project.findMany({
         include: { hours: true },
         orderBy: {
-          name: "asc",
+          name: 'asc',
         },
       });
       return projects;
     },
   })
-  .mutation("create", {
+  .mutation('create', {
     input: z.object({
       name: z.string(),
       clientId: z.string(),
     }),
     async resolve({ ctx, input: { name, clientId } }) {
       if (!ctx.session?.user?.id)
-        return ctx.res?.status(401).json({ message: "Unauthorized" });
+        return ctx.res?.status(401).json({ message: 'Unauthorized' });
       const newProject = prisma?.project.create({
         data: {
           name,
@@ -57,7 +57,7 @@ export const projectRouter = createRouter()
       return newProject;
     },
   })
-  .mutation("delete", {
+  .mutation('delete', {
     input: identifiableZod,
     async resolve({ ctx, input: { id } }) {
       const project = await ctx.prisma.project.findUnique({
@@ -81,7 +81,7 @@ export const projectRouter = createRouter()
       return ctx.prisma.project.delete({ where: { id } });
     },
   })
-  .mutation("update", {
+  .mutation('update', {
     input: identifiableZod.merge(
       z.object({ name: z.string(), clientId: z.string() })
     ),
