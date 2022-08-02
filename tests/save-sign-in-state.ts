@@ -1,4 +1,5 @@
-import { chromium, FullConfig } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
+import { writeFile } from "fs/promises";
 
 async function saveSignInState() {
   const browser = await chromium.launch();
@@ -8,19 +9,18 @@ async function saveSignInState() {
   const parsedUrl = `${
     NODE_ENV === "development" ? "http://" : "https://"
   }${url}`;
-  console.log("visiting url...", parsedUrl);
   await page.goto(parsedUrl);
   //timetracky home
-  const loginButton = page.locator("text=Login");
-  await loginButton.click();
+  await page.locator("text=Login").click();
   //google sso
-  const usernameInput = page.locator('input[name="identifier"]');
+  // From here on... we could get two pages depending on the locale... this is ridiculous...
   const { GOOGLE_TEST_USERNAME: username, GOOGLE_TEST_PASSWORD: password } =
     process.env;
   if (!username || !password) throw new Error("Missing google credentials");
+  let usernameInput = page.locator('input[type="email"]');
   await usernameInput.fill(username);
   await usernameInput.press("Enter");
-  const passwordInput = page.locator('input[name="password"]');
+  const passwordInput = page.locator('input[type="password"]');
   await passwordInput.fill(password);
   await passwordInput.press("Enter");
   await page.context().storageState({ path: "./tests/storageState.json" });
