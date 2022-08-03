@@ -4,6 +4,26 @@ import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'utils/pagination';
 import { z } from 'zod';
 import { createRouter } from './context';
 
+const diffStrArrays = (
+  newValues: string[],
+  oldValues: string[]
+): [toCreate: string[], toDelete: string[]] => {
+  const oldTagIdsSet = new Set(oldValues);
+  const tagIdsSet = new Set(newValues);
+  const disconnect: string[] = [];
+  const connect: string[] = [];
+
+  //? could I do this better without iterating twice?
+  tagIdsSet.forEach((newTid) => {
+    if (!oldTagIdsSet.has(newTid)) connect.push(newTid);
+  });
+  oldTagIdsSet.forEach((oldTid) => {
+    if (!tagIdsSet.has(oldTid)) disconnect.push(oldTid);
+  });
+
+  return [connect, disconnect];
+};
+
 export const hourRouter = createRouter()
   .query('single', {
     input: z.object({
@@ -234,18 +254,18 @@ export const hourRouter = createRouter()
       input: { id, date, description, projectId, tagIds, value, oldTagIds },
     }) {
       //! we need to know about the old tagIds so that we diff them, otherwise we can't replace relations looks like...
-      const oldTagIdsSet = new Set(oldTagIds);
-      const tagIdsSet = new Set(tagIds);
-      const disconnect: string[] = [];
-      const connect: string[] = [];
+      //? should we do this in the client?
+      const [toConnect, toDisconnect] = diffStrArrays(tagIds, oldTagIds);
 
-      //? could I do this better without iterating twice?
-      tagIdsSet.forEach((newTid) => {
-        if (!oldTagIdsSet.has(newTid)) connect.push(newTid);
-      });
-      oldTagIdsSet.forEach((oldTid) => {
-        if (!tagIdsSet.has(oldTid)) disconnect.push(oldTid);
-      });
+      const createManyQuery = toConnect?.length
+        ? { data: toConnect.map((c) => ({ tagId: c })) }
+        : undefined;
+      //todo check if this can be replaced (or is the same) as deleteMany
+      const deleteManyQuery = toDisconnect?.length
+        ? toDisconnect.map((d) => ({
+            tagId: d,
+          }))
+        : undefined;
 
       const edited = await ctx.prisma.hour.update({
         where: { id },
@@ -254,23 +274,13 @@ export const hourRouter = createRouter()
           description,
           projectId,
           value,
+          tags: {
+            createMany: createManyQuery,
+            deleteMany: deleteManyQuery,
+          },
         },
       });
 
-      //? wonder whether I could do this properly with the same update transaction rather than have to do it separatedly
-      connect.length &&
-        (await ctx.prisma.hourTag.createMany({
-          data: connect.map((c) => ({ tagId: c, hourId: id })),
-        }));
-      disconnect.length &&
-        (await ctx.prisma.hourTag.deleteMany({
-          where: {
-            hourId: id,
-            tagId: {
-              in: disconnect,
-            },
-          },
-        }));
       return edited;
     },
   })
