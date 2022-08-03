@@ -7,6 +7,7 @@ import { hourRouter } from './hour-router';
 import { projectRouter } from './project-router';
 import { tagRouter } from './tag-router';
 import { clientRouter } from './client-router';
+import { userRouter } from './user-router';
 
 export const appRouter = createRouter()
   .transformer(superjson)
@@ -14,6 +15,7 @@ export const appRouter = createRouter()
   .merge('hours.', hourRouter)
   .merge('projects.', projectRouter)
   .merge('tags.', tagRouter)
-  .merge('clients.', clientRouter);
+  .merge('clients.', clientRouter)
+  .merge('users.', userRouter);
 // export type definition of API
 export type AppRouter = typeof appRouter;

@@ -5,5 +5,4 @@ test('user logs in with sso and sees authorized page Hours', async ({
 }) => {
   const hoursNav = page.locator('text=Hours');
   expect(hoursNav).not.toBe(undefined);
-  console.log('hello?', hoursNav);
 });
