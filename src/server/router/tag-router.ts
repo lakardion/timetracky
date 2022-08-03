@@ -1,4 +1,4 @@
-import { createTagZod } from 'common/validators';
+import { createTagZod, searchZod } from 'common/validators';
 import { z } from 'zod';
 import { createRouter } from './context';
 
@@ -29,6 +29,17 @@ export const tagRouter = createRouter()
         }, 0),
       }));
     },
+  }).query('search', {
+    input: searchZod, async resolve({ ctx, input: { query } }) {
+      return ctx.prisma.tag.findMany({
+        where: {
+          name: {
+            contains: query,
+            mode: 'insensitive'
+          }
+        }
+      })
+    }
   })
   .mutation('create', {
     input: createTagZod,

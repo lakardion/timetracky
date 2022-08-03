@@ -35,3 +35,7 @@ export const createTagZod = z.object({
   name: z.string().min(1, 'Required'),
 });
 export type CreateTagInputs = z.infer<typeof createTagZod>;
+
+export const searchZod = z.object({
+  query: z.string().optional()
+}).default({})

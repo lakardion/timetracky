@@ -21,9 +21,11 @@ import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Event } from 'react-big-calendar';
 import { Controller, useForm } from 'react-hook-form';
-import ReactSelect from 'react-select';
+import AsyncReactSelect from 'react-select/async';
+import { OptionValueLabel } from 'types';
 import { formatDatepicker, localizeUTCDate, parseDatepicker } from 'utils/date';
-import { trpc } from 'utils/trpc';
+import { debouncePromiseValue } from 'utils/delay';
+import { createTRPCVanillaClient, trpc } from 'utils/trpc';
 
 const emptyDefaultValues: Partial<CreateHourFormInputs> = {
   date: formatDatepicker(new Date()),
@@ -32,6 +34,20 @@ const emptyDefaultValues: Partial<CreateHourFormInputs> = {
   tagIds: [],
   value: '0',
 };
+
+const searchProjects = async (value: string) => {
+  const client = createTRPCVanillaClient()
+  const projects = await client.query('projects.search', { query: value })
+  return projects.map(p => ({ value: p.id, label: p.name }))
+}
+const debouncedSearchProjects: typeof searchProjects = debouncePromiseValue(searchProjects, 500)
+
+const searchTags = async (value: string) => {
+  const client = createTRPCVanillaClient()
+  const tags = await client.query('tags.search', { query: value })
+  return tags.map(t => ({ value: t.id, label: t.name }))
+}
+const debouncedSearchTags: typeof searchTags = debouncePromiseValue(searchTags, 500)
 
 const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
   hourId,
@@ -95,22 +111,6 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
     onFinishEdit();
     reset(emptyDefaultValues);
   };
-
-  const tagOptions = useMemo(() => {
-    if (!tags) return [];
-    return tags.map((t) => ({
-      value: t.id,
-      label: t.name,
-    }));
-  }, [tags]);
-
-  const projectOptions = useMemo(() => {
-    if (!projects) return [];
-    return projects.map((p) => ({
-      value: p.id,
-      label: p.name,
-    }));
-  }, [projects]);
 
   const onSubmit = async (data: CreateHourFormInputs) => {
     const parsedData: CreateHourInputs = {
@@ -184,15 +184,13 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
           defaultValue={undefined}
           render={({ field }) => {
             return (
-              <ReactSelect
-                options={projectOptions}
+              <AsyncReactSelect<OptionValueLabel<string>>
+                defaultOptions
+                loadOptions={debouncedSearchProjects}
                 ref={field.ref}
                 onBlur={field.onBlur}
                 className="rounded text-black"
                 classNamePrefix="timetracky"
-                value={
-                  projectOptions.find((po) => po.value === field.value) ?? null
-                }
                 onChange={(value) => {
                   field.onChange(value?.value);
                 }}
@@ -219,17 +217,17 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
           control={control}
           defaultValue={[]}
           render={({ field }) => (
-            <ReactSelect
+            <AsyncReactSelect<OptionValueLabel<string>, true>
               isMulti
-              options={tagOptions}
+              defaultOptions
+              loadOptions={debouncedSearchTags}
               onBlur={field.onBlur}
               ref={field.ref}
               className="text-black"
               classNamePrefix="timetracky"
               onChange={(value) => {
-                field.onChange(value.map((v) => v.value));
+                field.onChange(value.map((v) => v?.value));
               }}
-              value={tagOptions.filter((to) => field.value.includes(to.value))}
               placeholder="Select tags..."
             />
           )}

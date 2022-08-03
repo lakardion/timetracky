@@ -1,7 +1,8 @@
 import { TRPCError } from '@trpc/server';
-import { identifiableZod } from 'common/validators';
+import { identifiableZod, searchZod } from 'common/validators';
 import { z } from 'zod';
 import { createRouter } from './context';
+
 
 export const projectRouter = createRouter()
   .query('exists', {
@@ -38,6 +39,15 @@ export const projectRouter = createRouter()
       });
       return projects;
     },
+  })
+  .query('search', {
+    input: searchZod, async resolve({ ctx, input: { query } }) {
+      // sigh typescript... It does not understand that 'insensitive' is a valid value
+      const whereClause: { name?: { contains?: string, mode?: 'insensitive' | 'default' } } | undefined = query ? { name: { contains: query, mode: 'insensitive' } } : undefined
+      return ctx.prisma.project.findMany({
+        where: whereClause
+      })
+    }
   })
   .mutation('create', {
     input: z.object({
