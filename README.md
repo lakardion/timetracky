@@ -16,35 +16,71 @@ Attempt to have a take on an everyday problem for human resource management in c
 - Google SSO with Next-auth
 - Tailwind CSS
 
-# Current features and todos
+# Current features
 
-(Will most likely move these to issues)
-
-- Auth
-  - [x] SSO with Google
-  - [x] Authorization-guard for role checking
+- SSO with Google
 - Hours
-  - [x] list hours
-  - [x] create hours
-  - [x] edit hours
-  - [x] delete hours
-  - [ ] calendar integration
-    - [x] filter by date
-    - [x] multiple select
-    - [ ] Improve styling on mobile
-  - [ ] create some sort of time awareness. When is a user out of date in hours?
-    - [ ] Maybe integrate an email notification on fridays eod (if hours were not loaded for that week)
-- Projects (admin/manager)
-  - [x] list projects with the amount of hours that they have related
-  - [x] create, edit delete projects
+  - Add hour
+  - See recently added hours
+  - See hours in calendar as events
+  - Select range in calendar and see hour details within that range
+  - Infinitely scroll on recently added hours
+  - Edit hours
+  - Delete hours
+- Projects
+  - Create delete edit projects
+  - Display current total hours registered for project
 - Administration
-  - [x] create, edit delete Clients
-  - [x] create, edit delete tags
-  - [ ] edit user information (roleType, workingHours)
-- Reports (admin/manager)
-  - [ ] base view
-  - [ ] idea: show users with their corresponding most recent hours. Show indicator if user has not logged any hours during this week, or has loaded less than expected (workingHours field of user)
-  - [ ] ... More to come
+  - Administration breadcrumb navigation
+  - Clients
+    - Create delete edit clients
+    - Display total projects the client has
+  - Tags
+    - Create delete tags.
+    - Display total hours each tag has been assigned to
+  - Users
+    - Display users with masked email
+    - Display summary of hours and projects
+    - Display profile picture (from google)
+    - Allow edit role of user
+
+# Dev setup
+
+## Prerequisites
+
+You need to have a `postgresql` database created so that you can add its connection url in the `.env` file.
+
+A local connection url for postgres looks like this
+
+`postgres://<username>:<password>@localhost/<databasename>`
+
+## Add envionment file
+
+Copy the existing `.env-example` and rename it to `.env`. Fill the placeholder values with your own
+
+## Install packages
+
+```shell
+yarn
+```
+
+## Run project
+
+```shell
+yarn dev
+```
+
+## Tests
+
+You can run tests with playwright, but you need to have a test google account and add the credentials to the `.env` file (you can add your own, the .env file does not get committed).
+
+We have the test account credentials as github secrets, so it runs on github actions safely
+
+While in development:
+
+```shell
+yarn run test-dev
+```
 
 # Create T3 App
 
