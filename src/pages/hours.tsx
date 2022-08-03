@@ -61,6 +61,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
   );
   const { data: hour } = trpc.useQuery(['hours.single', { id: hourId ?? '' }], {
     enabled: Boolean(hourId),
+    refetchOnWindowFocus: false
   });
 
   const defaultValues = useMemo(
@@ -119,10 +120,10 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
     };
     hour && hourId
       ? await editHour({
-          id: hourId,
-          oldTagIds: hour.tags?.map((t) => t.tagId) ?? [],
-          ...parsedData,
-        })
+        id: hourId,
+        oldTagIds: hour.tags?.map((t) => t.tagId) ?? [],
+        ...parsedData,
+      })
       : await createHour(parsedData);
     handleClose();
   };
