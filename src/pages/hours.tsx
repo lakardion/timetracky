@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { RoleType } from '@prisma/client';
 import {
   CreateHourFormInputs,
   CreateHourInputs,
@@ -36,28 +37,29 @@ const emptyDefaultValues: Partial<CreateHourFormInputs> = {
 };
 
 const searchProjects = async (value: string) => {
-  const client = createTRPCVanillaClient()
-  const projects = await client.query('projects.search', { query: value })
-  return projects.map(p => ({ value: p.id, label: p.name }))
-}
-const debouncedSearchProjects: typeof searchProjects = debouncePromiseValue(searchProjects, 500)
+  const client = createTRPCVanillaClient();
+  const projects = await client.query('projects.search', { query: value });
+  return projects.map((p) => ({ value: p.id, label: p.name }));
+};
+const debouncedSearchProjects: typeof searchProjects = debouncePromiseValue(
+  searchProjects,
+  500
+);
 
 const searchTags = async (value: string) => {
-  const client = createTRPCVanillaClient()
-  const tags = await client.query('tags.search', { query: value })
-  return tags.map(t => ({ value: t.id, label: t.name }))
-}
-const debouncedSearchTags: typeof searchTags = debouncePromiseValue(searchTags, 500)
+  const client = createTRPCVanillaClient();
+  const tags = await client.query('tags.search', { query: value });
+  return tags.map((t) => ({ value: t.id, label: t.name }));
+};
+const debouncedSearchTags: typeof searchTags = debouncePromiseValue(
+  searchTags,
+  500
+);
 
 const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
   hourId,
   onFinishEdit,
 }) => {
-  //todo: might need to define pagination?. These could go wild otherwise
-  //todo I think I might have to kick off this to the react select components rather
-  const { data: projects } = trpc.useQuery(['projects.all']);
-  const { data: tags } = trpc.useQuery(['tags.all']);
-
   const queryClient = trpc.useContext();
 
   const { mutateAsync: createHour, isLoading: isHourCreating } =
@@ -77,7 +79,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
   );
   const { data: hour } = trpc.useQuery(['hours.single', { id: hourId ?? '' }], {
     enabled: Boolean(hourId),
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   const defaultValues = useMemo(
@@ -120,30 +122,13 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
     };
     hour && hourId
       ? await editHour({
-        id: hourId,
-        oldTagIds: hour.tags?.map((t) => t.tagId) ?? [],
-        ...parsedData,
-      })
+          id: hourId,
+          oldTagIds: hour.tags?.map((t) => t.tagId) ?? [],
+          ...parsedData,
+        })
       : await createHour(parsedData);
     handleClose();
   };
-
-  if (!projects?.length) {
-    return (
-      <p className="italic">
-        There are no projects created, go to{' '}
-        <Link href="/projects">
-          <button
-            type="button"
-            className="text-blue-600 visited:text-purple-600 hover:underline"
-          >
-            Projects
-          </button>
-        </Link>{' '}
-        and add one
-      </p>
-    );
-  }
 
   return (
     <>
@@ -261,10 +246,58 @@ const getMonthRangeForDate = (date: Date) => {
   return { start: firstDay, end: lastDay };
 };
 
-const Hours = () => {
-  const { data: projects } = trpc.useQuery(['projects.all']);
+const HourCalendarContainer: FC<{
+  handleDateSelected: (date: Date[]) => void | undefined;
+  datesSelected: Date[] | undefined;
+}> = ({ datesSelected, handleDateSelected }) => {
+  const [currentCalendarRange, setCurrentCalendarRange] = useState(
+    getMonthRangeForDate(new Date())
+  );
+  const handleRangeChange: RangeChangeEventHandler = (range) => {
+    if (Array.isArray(range)) return; //don't want to address this rn
+    //! range comes UTC-centered so I have to localize that seems like. We only care about what day this happened we don't care what the time was
+    const { end, start } = range;
+    const localizedStart = localizeUTCDate(start);
+    const localizedEnd = localizeUTCDate(end);
+    setCurrentCalendarRange({ start: localizedStart, end: localizedEnd });
+  };
+  const { data: hoursByDate } = trpc.useQuery([
+    'hours.hoursByDate',
+    { dateFrom: currentCalendarRange.start, dateTo: currentCalendarRange.end },
+  ]);
+  const events: Event[] = useMemo(
+    () =>
+      hoursByDate?.map(
+        (hbd): Event => ({
+          allDay: true,
+          title: `${hbd.project.name}`,
+          start: hbd.date,
+          end: hbd.date,
+        })
+      ) ?? [],
+    [hoursByDate]
+  );
+
+  return (
+    <section
+      aria-label="calendar"
+      className=" flex justify-center lg:basis-8/12"
+    >
+      <HoursCalendar
+        events={events}
+        onRangeChange={handleRangeChange}
+        onSelectedChange={handleDateSelected}
+        selected={datesSelected}
+      />
+    </section>
+  );
+};
+
+const HoursMain = () => {
   const [editingHourId, setEditingHourId] = useState('');
   const queryClient = trpc.useContext();
+  const { data: user } = trpc.useQuery(['auth.me']);
+  const { data: hasProjects } = trpc.useQuery(['projects.any']);
   const {
     mutateAsync: deleteOne,
     isLoading: isDeleting,
@@ -297,34 +330,6 @@ const Hours = () => {
     handleCloseConfirm();
   };
 
-  const [currentCalendarRange, setCurrentCalendarRange] = useState(
-    getMonthRangeForDate(new Date())
-  );
-  const handleRangeChange: RangeChangeEventHandler = (range) => {
-    if (Array.isArray(range)) return; //don't want to address this rn
-    //! range comes UTC-centered so I have to localize that seems like. We only care about what day this happened we don't care what the time was
-    const { end, start } = range;
-    const localizedStart = localizeUTCDate(start);
-    const localizedEnd = localizeUTCDate(end);
-    setCurrentCalendarRange({ start: localizedStart, end: localizedEnd });
-  };
-  const { data: hoursByDate } = trpc.useQuery([
-    'hours.hoursByDate',
-    { dateFrom: currentCalendarRange.start, dateTo: currentCalendarRange.end },
-  ]);
-
-  const events: Event[] = useMemo(
-    () =>
-      hoursByDate?.map(
-        (hbd): Event => ({
-          allDay: true,
-          title: `${hbd.project.name}`,
-          start: hbd.date,
-          end: hbd.date,
-        })
-      ) ?? [],
-    [hoursByDate]
-  );
   //Calendar controls
   const [datesSelected, setDatesSelected] = useState<Date[]>([]);
   const handleDateSelected = useCallback((dates: Date[]) => {
@@ -348,13 +353,37 @@ const Hours = () => {
     };
   }, [datesSelected]);
 
+  if (!hasProjects) {
+    const noProjectsMessage =
+      user && user.roleType === RoleType.ADMIN ? (
+        <>
+          go to{' '}
+          <Link href="/projects">
+            <button
+              type="button"
+              className="text-blue-600 visited:text-purple-600 hover:underline"
+            >
+              Projects
+            </button>
+          </Link>{' '}
+          and add one
+        </>
+      ) : (
+        'ask an administrator to add them'
+      );
+    return (
+      <p className="text-center italic">
+        There are no projects created, {noProjectsMessage}
+      </p>
+    );
+  }
+
   return (
-    <section className="hours-container flex flex-col gap-3 2xl:flex-row 2xl:justify-around 2xl:gap-8 2xl:px-4">
-      <Head>
-        <title>Timetracky - Hours</title>
-        <meta name="description" content="Generated by create-t3-app" />
-      </Head>
-      <section className="flex items-start  justify-center">
+    <>
+      <section
+        aria-label="create edit hour form"
+        className="flex items-start  justify-center"
+      >
         <CreateEditHour
           hourId={editingHourId}
           onFinishEdit={handleFinishEdit}
@@ -364,42 +393,44 @@ const Hours = () => {
         className="flex flex-col gap-2 md:flex-grow lg:flex-row-reverse 2xl:flex-row-reverse"
         aria-label="hours and calendar container"
       >
+        <HourCalendarContainer
+          datesSelected={datesSelected}
+          handleDateSelected={handleDateSelected}
+        />
         <section
-          aria-label="calendar"
-          className=" flex justify-center lg:basis-8/12"
+          aria-label="hours list"
+          className="relative flex flex-col items-center justify-start md:flex-grow md:basis-4/12"
         >
-          <HoursCalendar
-            events={events}
-            onRangeChange={handleRangeChange}
-            onSelectedChange={handleDateSelected}
-            selected={datesSelected}
+          <HourList
+            onHourDelete={onHourDelete}
+            onHourEdit={onHourEdit}
+            selectedHourId={editingHourId}
+            dateFilter={dateFilter}
           />
         </section>
-        {projects?.length ? (
-          <section
-            aria-label="hours list"
-            className="relative flex flex-col items-center justify-start md:flex-grow md:basis-4/12"
-          >
-            <HourList
-              onHourDelete={onHourDelete}
-              onHourEdit={onHourEdit}
-              selectedHourId={editingHourId}
-              dateFilter={dateFilter}
+        {showConfirmationModal ? (
+          <Modal onBackdropClick={handleCloseConfirm}>
+            <ConfirmForm
+              body="Are you sure you want to delete an hour?"
+              onCancel={handleCloseConfirm}
+              onConfirm={handleSubmitDelete}
+              errorMessage={deleteError?.message}
+              isConfirming={isDeleting}
             />
-          </section>
+          </Modal>
         ) : null}
       </section>
-      {showConfirmationModal ? (
-        <Modal onBackdropClick={handleCloseConfirm}>
-          <ConfirmForm
-            body="Are you sure you want to delete an hour?"
-            onCancel={handleCloseConfirm}
-            onConfirm={handleSubmitDelete}
-            errorMessage={deleteError?.message}
-            isConfirming={isDeleting}
-          />
-        </Modal>
-      ) : null}
+    </>
+  );
+};
+const Hours = () => {
+  return (
+    <section className="hours-container flex flex-col gap-3 2xl:flex-row 2xl:justify-around 2xl:gap-8 2xl:px-4">
+      <Head>
+        <title>Timetracky - Hours</title>
+        <meta name="description" content="Generated by create-t3-app" />
+      </Head>
+      <HoursMain />
     </section>
   );
 };
