@@ -54,6 +54,7 @@ model User {
     sessions Session[]
     projects Project[]
     hours    Hour[]
+    hourExceptions HourException[]    
 }
 
 model VerificationToken {
@@ -120,3 +121,12 @@ enum RoleType {
     USER
     ADMIN
 }
+
+//Add exceptions to working hours given in
+model HourException {
+    id String @id @default(cuid())
+    date DateTime @db.Date
+    hours Int
+    userId String
+    user User @relation(fields:[userId],references:[id])
+  }
