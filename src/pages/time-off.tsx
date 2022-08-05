@@ -9,6 +9,9 @@ import ReactSelect from 'react-select';
 import { OptionValueLabel } from 'types';
 import { FormValidationError, Input } from 'components/form';
 import { dateInputValidateZod } from 'common/validators';
+import { trpc } from 'utils/trpc';
+import { parseDatepicker } from 'utils/date';
+import Head from 'next/head';
 
 const mapHourExceptionTypeToLabel: Record<HourExceptionType, string> = {
   TIME_OFF: 'Time off',
@@ -39,7 +42,29 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
   } = useForm<TimeOffInputs>({
     resolver: zodResolver(timeOffZod),
   });
-  const onSubmit = () => {};
+  const queryClient = trpc.useContext()
+  const { mutateAsync: create } = trpc.useMutation('hours.createException', {
+    onSuccess: () => {
+      //queryClient.invalidateQueries('hours.exceptions')
+    }
+  })
+  const onSubmit = async (data: TimeOffInputs) => {
+    const reqBody = {
+      type: data.hourType.value,
+      date: parseDatepicker(data.date),
+      hours: parseFloat(data.hours)
+    }
+    const zod = z.object({
+      hours: z.number(),
+      date: z.date(),
+      type: z.nativeEnum(HourExceptionType)
+    })
+    const result = zod.safeParse(reqBody)
+    console.log(result)
+    const created = await create(reqBody)
+    console.log('Hello it created', created)
+    onFinished()
+  };
 
   const hourExceptionTypeOptions: OptionValueLabel<HourExceptionType>[] = useMemo(
     () =>
@@ -102,15 +127,17 @@ const TimeOff = () => {
   };
 
   return (
-    <section>
-      <p className="italic">Request a day off</p>
-      <Button onClick={handleCreateDayOff}>Add days off</Button>
-      {showCreateModal ? (
-        <Modal onBackdropClick={hideCreateModal}>
-          <TimeOffForm onFinished={onFinished} />
-        </Modal>
-      ) : null}
-    </section>
+    <>
+      <section>
+        <p className="italic">Request a day off</p>
+        <Button onClick={handleCreateDayOff}>Add days off</Button>
+        {showCreateModal ? (
+          <Modal onBackdropClick={hideCreateModal}>
+            <TimeOffForm onFinished={onFinished} />
+          </Modal>
+        ) : null}
+      </section>
+    </>
   );
 };
 

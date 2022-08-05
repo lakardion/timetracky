@@ -1,3 +1,4 @@
+import { HourExceptionType } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { createHourZod } from 'common/validators';
 import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'utils/pagination';
@@ -263,8 +264,8 @@ export const hourRouter = createRouter()
       //todo check if this can be replaced (or is the same) as deleteMany
       const deleteManyQuery = toDisconnect?.length
         ? toDisconnect.map((d) => ({
-            tagId: d,
-          }))
+          tagId: d,
+        }))
         : undefined;
 
       const edited = await ctx.prisma.hour.update({
@@ -289,4 +290,21 @@ export const hourRouter = createRouter()
     async resolve({ ctx, input: { id } }) {
       return ctx.prisma.hour.delete({ where: { id } });
     },
+  }).mutation('createException', {
+    input: z.object({
+      hours: z.number(),
+      date: z.date(),
+      type: z.nativeEnum(HourExceptionType)
+    }), async resolve({ ctx, input: { hours, date, type } }) {
+      if (!ctx.session?.user?.id) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Must be logged in to perform this request' })
+      const hourException = await ctx.prisma.hourException.create({
+        data: {
+          hours: hours,
+          userId: ctx.session.user.id,
+          date,
+          type,
+        }
+      })
+      return hourException
+    }
   });
