@@ -8,27 +8,6 @@ import { FC, ReactNode } from 'react';
 import { trpc } from 'utils/trpc';
 import { Button } from './button';
 
-const routes: {
-  key: string;
-  href: string;
-  label: string;
-  roleRequired: RoleType;
-}[] = [
-  { key: 'hours', href: 'hours', label: 'Hours', roleRequired: 'USER' },
-  {
-    key: 'projects',
-    href: 'projects',
-    label: 'Projects',
-    roleRequired: 'ADMIN',
-  },
-  { key: 'reports', href: 'reports', label: 'Reports', roleRequired: 'ADMIN' },
-  {
-    key: 'admin',
-    href: 'administration',
-    label: 'Administration',
-    roleRequired: 'ADMIN',
-  },
-];
 
 const LoginActions = () => {
   const { data: session } = useSession();
@@ -80,6 +59,30 @@ const Header = () => {
   );
 };
 
+
+const routes: {
+  key: string;
+  href: string;
+  label: string;
+  roleRequired: RoleType;
+}[] = [
+    { key: 'hours', href: 'hours', label: 'Hours', roleRequired: 'USER' },
+    { key: 'time-off', href: 'time-off', label: 'Time off', roleRequired: 'USER' },
+    {
+      key: 'projects',
+      href: 'projects',
+      label: 'Projects',
+      roleRequired: 'ADMIN',
+    },
+    { key: 'reports', href: 'reports', label: 'Reports', roleRequired: 'ADMIN' },
+    {
+      key: 'admin',
+      href: 'administration',
+      label: 'Administration',
+      roleRequired: 'ADMIN',
+    },
+  ];
+
 const NavigationLinkList = () => {
   const { pathname } = useRouter();
   const { data: session } = trpc.useQuery(['auth.getSession']);
@@ -96,9 +99,8 @@ const NavigationLinkList = () => {
           <Link href={`/${r.href}`} key={r.key}>
             <button
               type="button"
-              className={`text-white hover:text-orange-400 ${
-                pathname.includes('/' + r.href) ? 'text-orange-400' : ''
-              }`}
+              className={`text-white hover:text-orange-400 ${pathname.includes('/' + r.href) ? 'text-orange-400' : ''
+                }`}
             >
               {r.label}
             </button>

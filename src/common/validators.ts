@@ -2,6 +2,11 @@ import { isMatch } from 'date-fns';
 import { trpc } from 'utils/trpc';
 import { z } from 'zod';
 
+export const dateInputValidateZod = z.string().refine((date) => {
+  if (!isMatch(date, 'yyyy-MM-dd')) return false;
+  return true;
+}, 'Required')
+
 export const identifiableZod = z.object({
   id: z.string().min(1, 'Required'),
 });
@@ -21,10 +26,7 @@ export const createHourZodForm = z.object({
       return true;
     }, 'Required'),
   projectId: z.string().min(1, 'Required'),
-  date: z.string().refine((date) => {
-    if (!isMatch(date, 'yyyy-MM-dd')) return false;
-    return true;
-  }, 'Required'),
+  date: dateInputValidateZod,
   description: z.string().min(1, 'Required'),
   tagIds: z.array(z.string()),
 });
