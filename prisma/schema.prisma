@@ -2,131 +2,137 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    // url      = "file:./db.sqlite"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // url      = "file:./db.sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String?
-    access_token      String?
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String?
-    session_state     String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    roleType      RoleType  @default(USER)
-    isActive      Boolean   @default(true)
-    workingHours  Int       @default(40)
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  roleType      RoleType  @default(USER)
+  isActive      Boolean   @default(true)
+  workingHours  Int       @default(40)
 
-    accounts Account[]
-    sessions Session[]
-    projects Project[]
-    hours    Hour[]
-    hourExceptions HourException[]    
+  accounts       Account[]
+  sessions       Session[]
+  projects       Project[]
+  hours          Hour[]
+  hourExceptions HourException[]
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
 }
 
 //business
 model Client {
-    id       String    @id @default(cuid())
-    name     String
-    projects Project[]
-    isActive Boolean   @default(true)
+  id       String    @id @default(cuid())
+  name     String
+  projects Project[]
+  isActive Boolean   @default(true)
 }
 
 model Project {
-    id        String  @id @default(cuid())
-    name      String  @unique
-    creatorId String
-    clientId  String
-    isActive  Boolean @default(true)
+  id        String  @id @default(cuid())
+  name      String  @unique
+  creatorId String
+  clientId  String
+  isActive  Boolean @default(true)
 
-    hours   Hour[]
-    client  Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-    creator User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  hours   Hour[]
+  client  Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 }
 
 model Hour {
-    id          String   @id @default(cuid())
-    date        DateTime
-    description String
-    value       Decimal
-    projectId   String
-    userId      String
-    updatedAt   DateTime @updatedAt
-    createdAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  date        DateTime
+  description String
+  value       Decimal
+  projectId   String
+  userId      String
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
 
-    tags    HourTag[]
-    user    User      @relation(fields: [userId], references: [id])
-    project Project   @relation(fields: [projectId], references: [id])
+  tags    HourTag[]
+  user    User      @relation(fields: [userId], references: [id])
+  project Project   @relation(fields: [projectId], references: [id])
 }
 
 model HourTag {
-    hourId String
-    tagId  String
+  hourId String
+  tagId  String
 
-    hour Hour @relation(fields: [hourId], references: [id], onDelete: Cascade)
-    tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  hour Hour @relation(fields: [hourId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
-    @@id([hourId, tagId])
+  @@id([hourId, tagId])
 }
 
 model Tag {
-    id       String    @id @default(cuid())
-    name     String
-    isActive Boolean   @default(true)
-    hours    HourTag[]
+  id       String    @id @default(cuid())
+  name     String
+  isActive Boolean   @default(true)
+  hours    HourTag[]
 }
 
 enum RoleType {
-    USER
-    ADMIN
+  USER
+  ADMIN
 }
 
 //Add exceptions to working hours given in
 model HourException {
-    id String @id @default(cuid())
-    date DateTime @db.Date
-    hours Int
-    userId String
-    user User @relation(fields:[userId],references:[id])
-  }
+  id     String            @id @default(cuid())
+  date   DateTime          @db.Date
+  hours  Int
+  userId String
+  user   User              @relation(fields: [userId], references: [id])
+  type   HourExceptionType
+}
+
+enum HourExceptionType {
+  VACATION
+  TIME_OFF
+}
