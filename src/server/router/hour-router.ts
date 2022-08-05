@@ -1,7 +1,7 @@
 import { HourExceptionType } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { createHourZod } from 'common/validators';
-import { DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'utils/pagination';
+import { cursorPaginationZod, DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'utils/pagination';
 import { z } from 'zod';
 import { createRouter } from './context';
 
@@ -49,75 +49,6 @@ export const hourRouter = createRouter()
       return { ...hour, value: hour?.value.toNumber() };
     },
   })
-  .query('withTagAndProject', {
-    input: z.object({
-      page: z.number().optional(),
-      size: z.number().optional(),
-      dateFilter: z
-        .object({
-          from: z.date(),
-          to: z.date(),
-        })
-        .optional()
-        .or(z.date()),
-    }),
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Need to be signed in to get this information',
-        });
-      }
-      const { page = 1, size = DEFAULT_HOURS_PAGE_SIZE, dateFilter } = input;
-      let dateWhereClause = undefined;
-      if (dateFilter instanceof Date) {
-        dateWhereClause = dateFilter;
-      } else if (dateFilter) {
-        dateWhereClause = {
-          gte: dateFilter.from,
-          lte: dateFilter.to,
-        };
-      }
-      const totalHours = await ctx.prisma.hour.count({
-        where: {
-          userId: ctx.session.user.id,
-          date: dateWhereClause,
-        },
-      });
-      const { count, next, previous } = getPagination({
-        count: totalHours,
-        size,
-        page,
-      });
-      //TODO: might be able to improve this with selections
-      const hours = await ctx.prisma?.hour.findMany({
-        where: {
-          userId: ctx.session?.user?.id,
-          date: dateWhereClause,
-        },
-        skip: (page - 1) * size,
-        take: size,
-        include: {
-          project: true,
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      });
-      return {
-        hours: hours.map((h) => ({ ...h, value: h.value.toNumber() })),
-        page,
-        count,
-        next,
-        previous,
-      };
-    },
-  })
   .query('withTagAndProjectInfinite', {
     input: z.object({
       dateFilter: z
@@ -126,13 +57,11 @@ export const hourRouter = createRouter()
           to: z.date(),
         })
         .optional()
-        .or(z.date()),
-      cursor: z.object({ page: z.number() }).default({ page: 1 }),
-      limit: z.number().optional(),
-    }),
+        .or(z.date())
+    }).merge(cursorPaginationZod),
     async resolve({
       ctx,
-      input: { cursor, limit = DEFAULT_HOURS_PAGE_SIZE, dateFilter },
+      input: { cursor, limit: clientLimit = DEFAULT_HOURS_PAGE_SIZE, dateFilter },
     }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -140,6 +69,7 @@ export const hourRouter = createRouter()
           message: 'Need to be signed in to get this information',
         });
       }
+      const limit = cursor?.limit ? cursor.limit : clientLimit
       let dateWhereClause = undefined;
       if (dateFilter instanceof Date) {
         dateWhereClause = dateFilter;
@@ -180,7 +110,7 @@ export const hourRouter = createRouter()
         hours: hours.map((h) => ({ ...h, value: h.value.toNumber() })),
         nextCursor:
           Math.ceil(totalHours / limit) > cursor.page
-            ? { page: cursor.page + 1 }
+            ? { page: cursor.page + 1, limit }
             : null,
       };
     },
@@ -290,6 +220,22 @@ export const hourRouter = createRouter()
     async resolve({ ctx, input: { id } }) {
       return ctx.prisma.hour.delete({ where: { id } });
     },
+  }).query('hourExceptionsInfinite', {
+    input: cursorPaginationZod,
+    async resolve({ ctx, input: { cursor, limit: clientLimit = DEFAULT_HOURS_PAGE_SIZE } }) {
+      const limit = cursor?.limit ? cursor.limit : clientLimit
+      const hourExceptions = await ctx.prisma.hourException.findMany({
+        orderBy: {
+          date: 'desc'
+        },
+        take: limit,
+        skip: (cursor.page - 1) * limit
+      })
+      const nextCursor = hourExceptions.length === limit ? { page: cursor.page + 1, limit } : null
+      return {
+        hourExceptions, nextCursor
+      }
+    }
   }).mutation('createException', {
     input: z.object({
       hours: z.number(),

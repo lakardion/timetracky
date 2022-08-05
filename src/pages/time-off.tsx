@@ -12,6 +12,32 @@ import { dateInputValidateZod } from 'common/validators';
 import { trpc } from 'utils/trpc';
 import { parseDatepicker } from 'utils/date';
 import Head from 'next/head';
+import { Spinner } from 'components/tw-spinner';
+import { format } from 'date-fns';
+
+const TimeOffList = () => {
+  const { data, isLoading, fetchNextPage } = trpc.useInfiniteQuery(['hours.hourExceptionsInfinite', {}], {
+    getNextPageParam: (lastPage) => {
+      return lastPage.nextCursor
+    }
+  })
+  //TODO: manage virtualization and attach listener for virtual fetchnext page
+  const allPages = useMemo(() => {
+    return data?.pages.flatMap(p => p.hourExceptions) ?? []
+  }, [data?.pages])
+  if (isLoading) return <Spinner />
+  if (!allPages.length) return <p className="italic">No days off registered </p>
+  return <ul className="flex flex-col gap-3">
+    {allPages.map(to => (
+      <li key={to.id} className="bg-gray-200 rounded-lg">
+        <section className="px-4 py-2">
+          <header>{mapHourExceptionTypeToLabel[to.type]}</header>
+          <p className="text-sm">{to.hours}hs on {format(to.date, 'MM/dd/yyyy')}</p>
+        </section>
+      </li>
+    ))}
+  </ul>
+}
 
 const mapHourExceptionTypeToLabel: Record<HourExceptionType, string> = {
   TIME_OFF: 'Time off',
@@ -45,7 +71,7 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
   const queryClient = trpc.useContext()
   const { mutateAsync: create } = trpc.useMutation('hours.createException', {
     onSuccess: () => {
-      //queryClient.invalidateQueries('hours.exceptions')
+      queryClient.invalidateQueries('hours.hourExceptionsInfinite')
     }
   })
   const onSubmit = async (data: TimeOffInputs) => {
@@ -60,9 +86,7 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
       type: z.nativeEnum(HourExceptionType)
     })
     const result = zod.safeParse(reqBody)
-    console.log(result)
     const created = await create(reqBody)
-    console.log('Hello it created', created)
     onFinished()
   };
 
@@ -128,9 +152,10 @@ const TimeOff = () => {
 
   return (
     <>
-      <section>
-        <p className="italic">Request a day off</p>
+      <section className="flex w-full flex-col gap-3 md:max-w-[60%] md:m-auto">
+        <p className="font-medium text-center">Request a day off</p>
         <Button onClick={handleCreateDayOff}>Add days off</Button>
+        <TimeOffList />
         {showCreateModal ? (
           <Modal onBackdropClick={hideCreateModal}>
             <TimeOffForm onFinished={onFinished} />
