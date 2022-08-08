@@ -48,6 +48,7 @@ model User {
   image         String?
   roleType      RoleType  @default(USER)
   isActive      Boolean   @default(true)
+  //weekly
   workingHours  Int       @default(40)
 
   accounts       Account[]
