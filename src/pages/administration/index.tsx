@@ -53,11 +53,7 @@ const Administration: NextPageWithLayout = () => {
             <li key={ac.href}>
               <Link href={`${asPath}/${ac.href}`}>
                 <button type="button" className="hover:opacity-60">
-                  <AdminCard
-                    title={ac.title}
-                    description={ac.description}
-                    icon={ac.icon}
-                  />
+                  <AdminCard title={ac.title} description={ac.description} icon={ac.icon} />
                 </button>
               </Link>
             </li>

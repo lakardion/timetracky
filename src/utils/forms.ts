@@ -3,10 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { DeepPartial, useForm } from 'react-hook-form';
 import { Schema } from 'zod';
 
-export const useEntityAwareForm = <T>(
-  formDefaults: DeepPartial<T>,
-  zodValidator: Schema<T>
-) => {
+export const useEntityAwareForm = <T>(formDefaults: DeepPartial<T>, zodValidator: Schema<T>) => {
   const form = useForm<T>({
     resolver: zodResolver(zodValidator),
     defaultValues: formDefaults,

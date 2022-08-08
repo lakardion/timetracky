@@ -8,7 +8,6 @@ import { FC, ReactNode } from 'react';
 import { trpc } from 'utils/trpc';
 import { Button } from './button';
 
-
 const LoginActions = () => {
   const { data: session } = useSession();
   const handleLogin = () => {
@@ -30,19 +29,9 @@ const LoginActions = () => {
     <section className="flex items-center gap-4">
       <div className="inline-flex flex-wrap items-center justify-end gap-1">
         <p className="hidden sm:inline-flex">Welcome</p>
-        <button
-          className="flex items-center gap-1 hover:text-orange-400"
-          type="button"
-          onClick={handleGoToProfile}
-        >
+        <button className="flex items-center gap-1 hover:text-orange-400" type="button" onClick={handleGoToProfile}>
           {session.user?.name}
-          <Image
-            src={session.user?.image ?? ''}
-            width={30}
-            height={30}
-            alt="user image"
-            className="rounded-full"
-          />
+          <Image src={session.user?.image ?? ''} width={30} height={30} alt="user image" className="rounded-full" />
         </button>
       </div>
       <Button onClick={handleLogout}>Logout</Button>
@@ -59,29 +48,28 @@ const Header = () => {
   );
 };
 
-
 const routes: {
   key: string;
   href: string;
   label: string;
   roleRequired: RoleType;
 }[] = [
-    { key: 'hours', href: 'hours', label: 'Hours', roleRequired: 'USER' },
-    { key: 'time-off', href: 'time-off', label: 'Time off', roleRequired: 'USER' },
-    {
-      key: 'projects',
-      href: 'projects',
-      label: 'Projects',
-      roleRequired: 'ADMIN',
-    },
-    { key: 'reports', href: 'reports', label: 'Reports', roleRequired: 'ADMIN' },
-    {
-      key: 'admin',
-      href: 'administration',
-      label: 'Administration',
-      roleRequired: 'ADMIN',
-    },
-  ];
+  { key: 'hours', href: 'hours', label: 'Hours', roleRequired: 'USER' },
+  { key: 'time-off', href: 'time-off', label: 'Time off', roleRequired: 'USER' },
+  {
+    key: 'projects',
+    href: 'projects',
+    label: 'Projects',
+    roleRequired: 'ADMIN',
+  },
+  { key: 'reports', href: 'reports', label: 'Reports', roleRequired: 'ADMIN' },
+  {
+    key: 'admin',
+    href: 'administration',
+    label: 'Administration',
+    roleRequired: 'ADMIN',
+  },
+];
 
 const NavigationLinkList = () => {
   const { pathname } = useRouter();
@@ -97,11 +85,7 @@ const NavigationLinkList = () => {
         if (r.roleRequired === 'ADMIN' && user?.roleType !== 'ADMIN') return [];
         return [
           <Link href={`/${r.href}`} key={r.key}>
-            <button
-              type="button"
-              className={`text-white hover:text-orange-400 ${pathname.includes('/' + r.href) ? 'text-orange-400' : ''
-                }`}
-            >
+            <button type="button" className={`text-white hover:text-orange-400 ${pathname.includes('/' + r.href) ? 'text-orange-400' : ''}`}>
               {r.label}
             </button>
           </Link>,

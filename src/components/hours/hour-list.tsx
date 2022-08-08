@@ -42,11 +42,7 @@ const useVirtualizedInfiniteHourList = (dateFilter?: DateFilter | Date) => {
         return;
       }
 
-      if (
-        lastItem.index >= allRows.length - 1 &&
-        hasNextPage &&
-        !isFetchingNextPage
-      ) {
+      if (lastItem.index >= allRows.length - 1 && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
       }
     },
@@ -81,8 +77,7 @@ export const HourList: FC<{
 }> = ({ onHourEdit, onHourDelete, selectedHourId, dateFilter }) => {
   const [hoveringId, setHoveringId] = useState('');
 
-  const { allRows, getTotalSize, getVirtualItems, hasNextPage, rVirtualRef } =
-    useVirtualizedInfiniteHourList(dateFilter);
+  const { allRows, getTotalSize, getVirtualItems, hasNextPage, rVirtualRef } = useVirtualizedInfiniteHourList(dateFilter);
 
   const createHoverHandler = (id: string) => (e: MouseEvent) => {
     e?.stopPropagation();
@@ -99,20 +94,13 @@ export const HourList: FC<{
     dateFilter instanceof Date
       ? `Filtering for ${format(dateFilter, 'MM-dd-yyyy')}`
       : typeof dateFilter === 'object'
-      ? `Filtering from ${format(dateFilter.from, 'MM-dd-yyyy')} to ${format(
-          dateFilter.to,
-          'MM-dd-yyyy'
-        )}`
+      ? `Filtering from ${format(dateFilter.from, 'MM-dd-yyyy')} to ${format(dateFilter.to, 'MM-dd-yyyy')}`
       : 'Last loaded hours';
 
   return (
     <>
       <h1 className="pb-2 text-2xl">{dateFilterParse}</h1>
-      <section
-        aria-label="scrollable hours container"
-        className="h-[700px] w-full overflow-auto md:max-w-[700px] 2xl:h-full"
-        ref={rVirtualRef}
-      >
+      <section aria-label="scrollable hours container" className="h-[700px] w-full overflow-auto md:max-w-[700px] 2xl:h-full" ref={rVirtualRef}>
         <ul
           className={`relative w-full`}
           style={{
@@ -120,9 +108,7 @@ export const HourList: FC<{
           }}
           onClick={createHoverHandler('')}
         >
-          {!getVirtualItems()?.length ? (
-            <li className="pt-3 text-center italic">No hours</li>
-          ) : null}
+          {!getVirtualItems()?.length ? <li className="pt-3 text-center italic">No hours</li> : null}
           {getVirtualItems().map((virtualRow) => {
             const isLoaderRow = virtualRow.index > allRows.length - 1;
             const h = allRows[virtualRow.index];

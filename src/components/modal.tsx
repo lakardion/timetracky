@@ -9,9 +9,7 @@ const useBrowserAwareBackdrop = () => {
     //needed to do this within client else window is possibly undefined
     const agent = window.navigator.userAgent;
     const isFirefox = agent.indexOf('Firefox') !== -1;
-    const blurOrBackdrop = isFirefox
-      ? 'bg-gray-300/50'
-      : 'bg-transparent backdrop-blur-sm';
+    const blurOrBackdrop = isFirefox ? 'bg-gray-300/50' : 'bg-transparent backdrop-blur-sm';
     setBlurOrBackdrop(blurOrBackdrop);
   }, []);
 
@@ -28,10 +26,7 @@ const useFadeAfterRender = () => {
     setHasFaded(true);
   }, []);
 
-  const stableOpacity = useMemo(
-    () => (hasFaded ? 'opacity-100' : 'opacity-0'),
-    [hasFaded]
-  );
+  const stableOpacity = useMemo(() => (hasFaded ? 'opacity-100' : 'opacity-0'), [hasFaded]);
 
   return stableOpacity;
 };

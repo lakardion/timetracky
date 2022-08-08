@@ -16,10 +16,7 @@ const AdministrationBreadCrumbs = () => {
   if (paths.length === 1) return <></>;
 
   return (
-    <section
-      aria-label="breadcrumbs"
-      className="-mt-4 w-full rounded-bl-lg rounded-br-lg bg-gray-200"
-    >
+    <section aria-label="breadcrumbs" className="-mt-4 w-full rounded-bl-lg rounded-br-lg bg-gray-200">
       <ul className="flex items-center justify-start gap-3 p-3">
         {paths.map((p, idx) => (
           <>
@@ -29,9 +26,7 @@ const AdministrationBreadCrumbs = () => {
               ) : (
                 <>
                   <Link href={p.href}>
-                    <p className="capitalize text-blue-600 hover:cursor-pointer hover:underline">
-                      {p.key}
-                    </p>
+                    <p className="capitalize text-blue-600 hover:cursor-pointer hover:underline">{p.key}</p>
                   </Link>
                 </>
               )}

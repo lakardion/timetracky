@@ -11,8 +11,7 @@ import { OptionValueLabel } from 'types';
 import { trpc } from 'utils/trpc';
 
 const useUserData = (id: string) => {
-  const [selectedRoleOption, setSelectedRoleOption] =
-    useState<OptionValueLabel<RoleType>>(null);
+  const [selectedRoleOption, setSelectedRoleOption] = useState<OptionValueLabel<RoleType>>(null);
 
   const oldValueRef = useRef<RoleType | null>(null);
 
@@ -33,18 +32,12 @@ const useUserData = (id: string) => {
     []
   );
 
-  const handleRoleOptionChange = useCallback(
-    (option: OptionValueLabel<RoleType>) => {
-      setSelectedRoleOption(option);
-    },
-    []
-  );
+  const handleRoleOptionChange = useCallback((option: OptionValueLabel<RoleType>) => {
+    setSelectedRoleOption(option);
+  }, []);
 
   const handleUpdateRole = useCallback(async () => {
-    if (
-      selectedRoleOption &&
-      oldValueRef.current !== selectedRoleOption.value
-    ) {
+    if (selectedRoleOption && oldValueRef.current !== selectedRoleOption.value) {
       await updateRole({ id, role: selectedRoleOption.value });
       oldValueRef.current = selectedRoleOption.value;
     }
@@ -68,16 +61,8 @@ const useUserData = (id: string) => {
   );
 };
 
-const UserForm: FC<{ id: string; onFinished: () => void }> = ({
-  id,
-  onFinished,
-}) => {
-  const {
-    roleOptions,
-    handleRoleOptionChange,
-    selectedRoleOption,
-    handleUpdateRole,
-  } = useUserData(id);
+const UserForm: FC<{ id: string; onFinished: () => void }> = ({ id, onFinished }) => {
+  const { roleOptions, handleRoleOptionChange, selectedRoleOption, handleUpdateRole } = useUserData(id);
   //Which is the harder and non-useEffecty way?
   // so we have the value from db: user but if we want to sync the information here we definitely need to have a useEffect.
   // how was I doing the other forms?, well I reset the things with A useEffect... so that means probably that these type of things
@@ -97,9 +82,7 @@ const UserForm: FC<{ id: string; onFinished: () => void }> = ({
       <ReactSelect<OptionValueLabel<RoleType>>
         options={roleOptions}
         onChange={handleRoleOptionChange}
-        formatOptionLabel={(option) => (
-          <p className="capitalize">{option?.label}</p>
-        )}
+        formatOptionLabel={(option) => <p className="capitalize">{option?.label}</p>}
         value={selectedRoleOption}
         className="text-black"
       />
@@ -140,40 +123,22 @@ const Users: NextPageWithLayout = () => {
       </Head>
       <ul className="flex flex-wrap gap-3">
         {users.map((u) => {
-          const userExtraInfo =
-            u.projectCount && u.hourCount
-              ? `${u.hourCount} hours across ${u.projectCount} projects`
-              : 'No hours registered yet';
+          const userExtraInfo = u.projectCount && u.hourCount ? `${u.hourCount} hours across ${u.projectCount} projects` : 'No hours registered yet';
           return (
-            <li
-              key={u.id}
-              className="flex w-80 cursor-pointer gap-3 rounded-lg bg-slate-400 p-4"
-              onClick={createUserClickHandler(u.id)}
-            >
+            <li key={u.id} className="flex w-80 cursor-pointer gap-3 rounded-lg bg-slate-400 p-4" onClick={createUserClickHandler(u.id)}>
               <section className="rounded-full border border-solid border-gray-400/30 bg-black/40">
-                <Image
-                  src={u.image ?? ''}
-                  alt="User image"
-                  height={100}
-                  width={100}
-                  className="rounded-full"
-                />
+                <Image src={u.image ?? ''} alt="User image" height={100} width={100} className="rounded-full" />
               </section>
               <section className="flex flex-col items-center gap-2">
                 <h1 className="text-2xl font-medium">{u.name}</h1>
                 <p className="text-sm">{u.maskedEmail}</p>
-                {userExtraInfo ? (
-                  <p className="text-sm">{userExtraInfo}</p>
-                ) : null}
+                {userExtraInfo ? <p className="text-sm">{userExtraInfo}</p> : null}
               </section>
             </li>
           );
         })}
         {showUserModal ? (
-          <Modal
-            onBackdropClick={onFinished}
-            className="flex flex-col md:min-w-[400px]"
-          >
+          <Modal onBackdropClick={onFinished} className="flex flex-col md:min-w-[400px]">
             <UserForm id={currentId} onFinished={onFinished} />
           </Modal>
         ) : null}

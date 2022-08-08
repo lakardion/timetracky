@@ -18,26 +18,30 @@ import { format } from 'date-fns';
 const TimeOffList = () => {
   const { data, isLoading, fetchNextPage } = trpc.useInfiniteQuery(['hours.hourExceptionsInfinite', {}], {
     getNextPageParam: (lastPage) => {
-      return lastPage.nextCursor
-    }
-  })
+      return lastPage.nextCursor;
+    },
+  });
   //TODO: manage virtualization and attach listener for virtual fetchnext page
   const allPages = useMemo(() => {
-    return data?.pages.flatMap(p => p.hourExceptions) ?? []
-  }, [data?.pages])
-  if (isLoading) return <Spinner />
-  if (!allPages.length) return <p className="italic">No days off registered </p>
-  return <ul className="flex flex-col gap-3">
-    {allPages.map(to => (
-      <li key={to.id} className="bg-gray-200 rounded-lg">
-        <section className="px-4 py-2">
-          <header>{mapHourExceptionTypeToLabel[to.type]}</header>
-          <p className="text-sm">{to.hours}hs on {format(to.date, 'MM/dd/yyyy')}</p>
-        </section>
-      </li>
-    ))}
-  </ul>
-}
+    return data?.pages.flatMap((p) => p.hourExceptions) ?? [];
+  }, [data?.pages]);
+  if (isLoading) return <Spinner />;
+  if (!allPages.length) return <p className="italic">No days off registered </p>;
+  return (
+    <ul className="flex flex-col gap-3">
+      {allPages.map((to) => (
+        <li key={to.id} className="rounded-lg bg-gray-200">
+          <section className="px-4 py-2">
+            <header>{mapHourExceptionTypeToLabel[to.type]}</header>
+            <p className="text-sm">
+              {to.hours}hs on {format(to.date, 'MM/dd/yyyy')}
+            </p>
+          </section>
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 const mapHourExceptionTypeToLabel: Record<HourExceptionType, string> = {
   TIME_OFF: 'Time off',
@@ -68,26 +72,26 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
   } = useForm<TimeOffInputs>({
     resolver: zodResolver(timeOffZod),
   });
-  const queryClient = trpc.useContext()
+  const queryClient = trpc.useContext();
   const { mutateAsync: create } = trpc.useMutation('hours.createException', {
     onSuccess: () => {
-      queryClient.invalidateQueries('hours.hourExceptionsInfinite')
-    }
-  })
+      queryClient.invalidateQueries('hours.hourExceptionsInfinite');
+    },
+  });
   const onSubmit = async (data: TimeOffInputs) => {
     const reqBody = {
       type: data.hourType.value,
       date: parseDatepicker(data.date),
-      hours: parseFloat(data.hours)
-    }
+      hours: parseFloat(data.hours),
+    };
     const zod = z.object({
       hours: z.number(),
       date: z.date(),
-      type: z.nativeEnum(HourExceptionType)
-    })
-    const result = zod.safeParse(reqBody)
-    const created = await create(reqBody)
-    onFinished()
+      type: z.nativeEnum(HourExceptionType),
+    });
+    const result = zod.safeParse(reqBody);
+    const created = await create(reqBody);
+    onFinished();
   };
 
   const hourExceptionTypeOptions: OptionValueLabel<HourExceptionType>[] = useMemo(
@@ -105,7 +109,7 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
       <Input type="date" {...register('date')} />
       <FormValidationError error={errors.date} />
       <label htmlFor="hours">Hours</label>
-      <Input type="text" placeholder="Hours..."  {...register('hours')} />
+      <Input type="text" placeholder="Hours..." {...register('hours')} />
       <FormValidationError error={errors.hours} />
       <label htmlFor="hourType"></label>
       <Controller
@@ -152,8 +156,8 @@ const TimeOff = () => {
 
   return (
     <>
-      <section className="flex w-full flex-col gap-3 md:max-w-[60%] md:m-auto">
-        <p className="font-medium text-center">Request a day off</p>
+      <section className="flex w-full flex-col gap-3 md:m-auto md:max-w-[60%]">
+        <p className="text-center font-medium">Request a day off</p>
         <Button onClick={handleCreateDayOff}>Add days off</Button>
         <TimeOffList />
         {showCreateModal ? (

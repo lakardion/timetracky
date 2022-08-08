@@ -19,10 +19,7 @@ const NotFound = () => {
         ) : (
           <p>
             You do not appear to be logged in,{' '}
-            <button
-              className="text-blue-600 hover:underline"
-              onClick={signInToGoogle}
-            >
+            <button className="text-blue-600 hover:underline" onClick={signInToGoogle}>
               Log in here!
             </button>
           </p>

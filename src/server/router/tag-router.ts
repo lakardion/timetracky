@@ -29,17 +29,19 @@ export const tagRouter = createRouter()
         }, 0),
       }));
     },
-  }).query('search', {
-    input: searchZod, async resolve({ ctx, input: { query } }) {
+  })
+  .query('search', {
+    input: searchZod,
+    async resolve({ ctx, input: { query } }) {
       return ctx.prisma.tag.findMany({
         where: {
           name: {
             contains: query,
-            mode: 'insensitive'
-          }
-        }
-      })
-    }
+            mode: 'insensitive',
+          },
+        },
+      });
+    },
   })
   .mutation('create', {
     input: createTagZod,

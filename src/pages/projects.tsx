@@ -4,14 +4,7 @@ import { FormValidationError, Input } from 'components/form';
 import { Modal } from 'components/modal';
 import Head from 'next/head';
 import Link from 'next/link';
-import {
-  ChangeEventHandler,
-  FC,
-  MouseEvent,
-  ReactNode,
-  useMemo,
-  useState,
-} from 'react';
+import { ChangeEventHandler, FC, MouseEvent, ReactNode, useMemo, useState } from 'react';
 import { Controller, DeepPartial } from 'react-hook-form';
 import { FaEllipsisH } from 'react-icons/fa';
 import { MdDeleteOutline, MdOutlineModeEditOutline } from 'react-icons/md';
@@ -57,10 +50,7 @@ const createProjectFormZod = z.object({
 
 export type CreateProjectInputs = z.infer<typeof createProjectFormZod>;
 
-const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
-  onFinished,
-  id,
-}) => {
+const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({ onFinished, id }) => {
   //TODO: paginate or make async select
   const { data: clients } = trpc.useQuery(['clients.all']);
   const { data: project } = trpc.useQuery(['projects.single', { id }], {
@@ -79,33 +69,22 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
     formState: { errors },
     control,
     getValues,
-  } = useEntityAwareForm<CreateProjectInputs>(
-    defaultValues,
-    createProjectFormZod
-  );
+  } = useEntityAwareForm<CreateProjectInputs>(defaultValues, createProjectFormZod);
 
   const queryClient = trpc.useContext();
-  const { mutateAsync: create, isLoading: isCreating } = trpc.useMutation(
-    'projects.create',
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['projects.all']);
-      },
-    }
-  );
-  const { mutateAsync: update, isLoading: isUpdating } = trpc.useMutation(
-    'projects.update',
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('projects.all');
-      },
-    }
-  );
+  const { mutateAsync: create, isLoading: isCreating } = trpc.useMutation('projects.create', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['projects.all']);
+    },
+  });
+  const { mutateAsync: update, isLoading: isUpdating } = trpc.useMutation('projects.update', {
+    onSuccess: () => {
+      queryClient.invalidateQueries('projects.all');
+    },
+  });
 
   const onSubmit = async (data: CreateProjectInputs) => {
-    id && project
-      ? await update({ id, clientId: data.clientId, name: data.name })
-      : await create(data);
+    id && project ? await update({ id, clientId: data.clientId, name: data.name }) : await create(data);
     onFinished();
   };
 
@@ -124,13 +103,8 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
   }, [clients]);
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-grow flex-col justify-between gap-3"
-    >
-      <h1 className="text-3xl font-semibold">
-        {id ? 'Edit project' : 'Create project'}
-      </h1>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-grow flex-col justify-between gap-3">
+      <h1 className="text-3xl font-semibold">{id ? 'Edit project' : 'Create project'}</h1>
       <label htmlFor="name" className="font-medium">
         Name
       </label>
@@ -160,19 +134,10 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({
       />
       <FormValidationError error={errors.clientId} />
       <section className="flex gap-2">
-        <Button
-          className="flex-grow"
-          type="submit"
-          isLoading={isCreating || isUpdating}
-          disabled={isCreating || isUpdating}
-        >
+        <Button className="flex-grow" type="submit" isLoading={isCreating || isUpdating} disabled={isCreating || isUpdating}>
           {id ? 'Edit project' : 'Create project'}
         </Button>
-        <Button
-          className="flex-grow"
-          onClick={onFinished}
-          disabled={isCreating || isUpdating}
-        >
+        <Button className="flex-grow" onClick={onFinished} disabled={isCreating || isUpdating}>
           Cancel
         </Button>
       </section>
@@ -196,30 +161,23 @@ const ProjectList: FC<{
       </div>
     );
   }
-  const createHoverHandler =
-    (id: string) =>
-    (e: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLLIElement>) => {
-      e?.stopPropagation();
-      setHoveringId(id);
-    };
-  const createEditHandler =
-    (id: string) => (e: MouseEvent<HTMLButtonElement>) => {
-      e?.stopPropagation();
-      onEdit(id);
-    };
-  const createDeleteHandler =
-    (id: string) => (e: MouseEvent<HTMLButtonElement>) => {
-      e?.stopPropagation();
-      onDelete(id);
-    };
+  const createHoverHandler = (id: string) => (e: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLLIElement>) => {
+    e?.stopPropagation();
+    setHoveringId(id);
+  };
+  const createEditHandler = (id: string) => (e: MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
+    onEdit(id);
+  };
+  const createDeleteHandler = (id: string) => (e: MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
+    onDelete(id);
+  };
   const clearHover = () => {
     setHoveringId('');
   };
   return (
-    <ul
-      className="flex flex-col items-center justify-center gap-3"
-      ref={parent}
-    >
+    <ul className="flex flex-col items-center justify-center gap-3" ref={parent}>
       {projects.map((p) => {
         const hoursCount = p.hours?.length ?? 0;
         const hourPlural = 'h' + (hoursCount > 1 ? 's' : '');
@@ -234,40 +192,18 @@ const ProjectList: FC<{
             <section aria-label="project name" className="font-medium">
               {p.name}
             </section>
-            <section aria-label="project hours">
-              {hoursCount ? `${hoursCount} ${hourPlural}` : 'No hours'}
-            </section>
+            <section aria-label="project hours">{hoursCount ? `${hoursCount} ${hourPlural}` : 'No hours'}</section>
             {hoveringId === p.id ? (
-              <div
-                className="absolute -right-3 -top-3 flex items-center justify-center gap-1 rounded"
-                aria-label="hour actions"
-              >
-                <button
-                  type="button"
-                  onClick={createEditHandler(p.id)}
-                  className="rounded-full bg-red-300 p-1"
-                >
-                  <MdOutlineModeEditOutline
-                    className="fill-gray-900 hover:fill-orange-700"
-                    size={20}
-                  />
+              <div className="absolute -right-3 -top-3 flex items-center justify-center gap-1 rounded" aria-label="hour actions">
+                <button type="button" onClick={createEditHandler(p.id)} className="rounded-full bg-red-300 p-1">
+                  <MdOutlineModeEditOutline className="fill-gray-900 hover:fill-orange-700" size={20} />
                 </button>
-                <button
-                  type="button"
-                  onClick={createDeleteHandler(p.id)}
-                  className="rounded-full bg-red-300 p-1"
-                >
-                  <MdDeleteOutline
-                    className="fill-gray-900 hover:fill-orange-700"
-                    size={20}
-                  />
+                <button type="button" onClick={createDeleteHandler(p.id)} className="rounded-full bg-red-300 p-1">
+                  <MdDeleteOutline className="fill-gray-900 hover:fill-orange-700" size={20} />
                 </button>
               </div>
             ) : (
-              <div
-                className="absolute right-3 top-1 lg:hidden"
-                aria-label="display hour actions"
-              >
+              <div className="absolute right-3 top-1 lg:hidden" aria-label="display hour actions">
                 <button type="button" onClick={createHoverHandler(p.id)}>
                   <FaEllipsisH size={15} />
                 </button>
@@ -291,9 +227,7 @@ const Projects: NextPageWithLayout = () => {
     setShowAddProject(false);
   };
   const queryClient = trpc.useContext();
-  const { data: clients, isLoading: areClientsLoading } = trpc.useQuery([
-    'clients.all',
-  ]);
+  const { data: clients, isLoading: areClientsLoading } = trpc.useQuery(['clients.all']);
   const { isLoading: areProjectsLoading } = trpc.useQuery(['projects.all']);
   const {
     mutateAsync: deleteOne,
@@ -333,10 +267,7 @@ const Projects: NextPageWithLayout = () => {
           <p className="text-center text-base italic">
             No clients found.{' '}
             <Link href="/administration/clients">
-              <button
-                type="button"
-                className="text-blue-600 visited:text-purple-500 hover:underline"
-              >
+              <button type="button" className="text-blue-600 visited:text-purple-500 hover:underline">
                 Clients
               </button>
             </Link>{' '}
@@ -352,15 +283,9 @@ const Projects: NextPageWithLayout = () => {
       <div className="flex w-full justify-center">
         <Button onClick={handleCreateEditOpen}>Add a project</Button>
       </div>
-      <ProjectList
-        onDelete={handleShowDeleteconfirmation}
-        onEdit={handleEdit}
-      />
+      <ProjectList onDelete={handleShowDeleteconfirmation} onEdit={handleEdit} />
       {showAddProject && (
-        <Modal
-          onBackdropClick={handleFinished}
-          className="flex flex-col md:min-h-[300px] md:min-w-[400px]"
-        >
+        <Modal onBackdropClick={handleFinished} className="flex flex-col md:min-h-[300px] md:min-w-[400px]">
           <CreateEditForm onFinished={handleFinished} id={currentProjectId} />
         </Modal>
       )}

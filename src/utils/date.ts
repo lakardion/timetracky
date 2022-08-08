@@ -18,7 +18,7 @@ export const localizeUTCDate = (date: Date) => {
 };
 
 //from gists
-const DAYS_IN_A_WEEK = 7 
+const DAYS_IN_A_WEEK = 7;
 /**
  * Add a certain amount of days to a date
  * @param {number} days number of days to add.
@@ -44,15 +44,10 @@ export const getWeekArrayFromDate = (date: Date) => {
   });
 };
 
-export const getDateIndexesFromWeek = (
-  week: Date[],
-  dates: Date[]
-): number[] => {
+export const getDateIndexesFromWeek = (week: Date[], dates: Date[]): number[] => {
   const dateIndexes: number[] = [];
   dates.forEach((d, idx) => {
-    dateIndexes[idx] = week.findIndex(
-      (day) => day.toDateString() === d.toDateString()
-    );
+    dateIndexes[idx] = week.findIndex((day) => day.toDateString() === d.toDateString());
   });
   return dateIndexes;
 };
@@ -60,8 +55,7 @@ export const getDateIndexesFromWeek = (
 /**
  * Determines whether a date is between two dates.
  */
-export const dateIsBetween = (date: Date, begin: Date, end: Date) =>
-  date > begin && date < end;
+export const dateIsBetween = (date: Date, begin: Date, end: Date) => date > begin && date < end;
 
 export const getDateRange = (initialDate: Date, endDate: Date): Date[] => {
   let currentDate = initialDate;
@@ -90,10 +84,7 @@ export const getFollowingWeeks = (start: Date, weeks: number): Date[][] => {
  */
 export const getMonthWeeks = (reference: Date, forward = 0): Date[][] => {
   const monthStart = new Date(reference.getFullYear(), reference.getMonth(), 1);
-  const end =
-    forward === 0
-      ? new Date(reference.getFullYear(), reference.getMonth() + 1, 0)
-      : addDays(monthStart, DAYS_IN_A_WEEK * forward);
+  const end = forward === 0 ? new Date(reference.getFullYear(), reference.getMonth() + 1, 0) : addDays(monthStart, DAYS_IN_A_WEEK * forward);
   const result: Date[][] = [];
   let currentDate = monthStart;
   while (currentDate < end) {

@@ -7,8 +7,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '../../../server/db/client';
 import { env } from '../../../server/env.mjs';
 
-if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_SECRET))
-  throw new Error('Google env variables were not found');
+if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_SECRET)) throw new Error('Google env variables were not found');
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {

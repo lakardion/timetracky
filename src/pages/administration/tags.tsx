@@ -41,18 +41,10 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
       <label htmlFor="name" className="font-medium">
         Name
       </label>
-      <input
-        {...register('name')}
-        className="rounded-md border border-solid border-gray-400 px-2 py-1 text-black"
-      />
+      <input {...register('name')} className="rounded-md border border-solid border-gray-400 px-2 py-1 text-black" />
       <FormValidationError error={errors.name} />
       <div className="flex gap-3">
-        <Button
-          type="submit"
-          className="flex-grow"
-          isLoading={isLoading}
-          disabled={isLoading}
-        >
+        <Button type="submit" className="flex-grow" isLoading={isLoading} disabled={isLoading}>
           Create
         </Button>
         <Button className="flex-grow" onClick={onFinish} disabled={isLoading}>
@@ -63,9 +55,7 @@ const TagEditCreateForm: FC<{ onFinish: () => void }> = ({ onFinish }) => {
   );
 };
 
-const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
-  onTagDelete,
-}) => {
+const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({ onTagDelete }) => {
   const { data: tagsWithHour } = trpc.useQuery(['tags.withHourCount']);
   const createTagDeleteHandler = (tagId: string) => () => {
     onTagDelete(tagId);
@@ -73,8 +63,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
   const [hoveringId, setHoveringId] = useState('');
   const [parent] = useAutoAnimate<HTMLUListElement>();
   if (!tagsWithHour) return null;
-  if (!tagsWithHour?.length)
-    return <p className="pt-3 text-base italic">No tags added yet</p>;
+  if (!tagsWithHour?.length) return <p className="pt-3 text-base italic">No tags added yet</p>;
   const createHoverHandler = (id: string) => () => {
     setHoveringId(id);
   };
@@ -96,9 +85,7 @@ const TagList: FC<{ onTagDelete: (tagId: string) => void }> = ({
               {t.name} ({t.hourCount})
             </p>
             <button
-              className={`${
-                hoveringId === t.id ? '' : 'hidden'
-              } absolute -top-3 -right-3 rounded-full border-2 border-solid border-gray-400 bg-red-300 p-1`}
+              className={`${hoveringId === t.id ? '' : 'hidden'} absolute -top-3 -right-3 rounded-full border-2 border-solid border-gray-400 bg-red-300 p-1`}
               onClick={createTagDeleteHandler(t.id)}
             >
               <MdDeleteOutline size={18} />
@@ -166,13 +153,7 @@ const Tags: NextPageWithLayout = () => {
       ) : null}
       {isConfirmModalOpen ? (
         <Modal onBackdropClick={handleConfirmModalClose}>
-          <ConfirmForm
-            body="Confirm delete tag"
-            onCancel={handleConfirmModalClose}
-            onConfirm={handleConfirmDelete}
-            isConfirming={isDeleting}
-            errorMessage={deleteError?.message}
-          />
+          <ConfirmForm body="Confirm delete tag" onCancel={handleConfirmModalClose} onConfirm={handleConfirmDelete} isConfirming={isDeleting} errorMessage={deleteError?.message} />
         </Modal>
       ) : null}
     </>

@@ -1,17 +1,11 @@
 import { FC, ReactNode, useMemo, useState } from 'react';
 
-const LongParagraph: FC<{ charLimit: number; children: string }> = ({
-  charLimit,
-  children,
-}) => {
+const LongParagraph: FC<{ charLimit: number; children: string }> = ({ charLimit, children }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [first, second] = useMemo(() => {
     if (children.length > charLimit) {
-      return [
-        children.substring(0, charLimit) + '...',
-        children.substring(charLimit),
-      ];
+      return [children.substring(0, charLimit) + '...', children.substring(charLimit)];
     }
     return [children, null];
   }, [charLimit, children]);
@@ -27,17 +21,11 @@ const LongParagraph: FC<{ charLimit: number; children: string }> = ({
         {first} {isExpanded ? second : null}
       </p>
       {!isExpanded ? (
-        <p
-          className="text-blue-600 hover:cursor-pointer hover:underline"
-          onClick={handleToggleExpand}
-        >
+        <p className="text-blue-600 hover:cursor-pointer hover:underline" onClick={handleToggleExpand}>
           more
         </p>
       ) : (
-        <p
-          onClick={handleToggleExpand}
-          className="text-blue-600 hover:cursor-pointer hover:underline"
-        >
+        <p onClick={handleToggleExpand} className="text-blue-600 hover:cursor-pointer hover:underline">
           less
         </p>
       )}

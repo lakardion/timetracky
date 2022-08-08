@@ -11,19 +11,10 @@ export const Button: FC<
   return (
     <button
       {...props}
-      className={
-        overrides?.className
-          ? overrides.className
-          : 'flex items-center justify-center rounded bg-orange-400 px-2 py-0.5 text-white hover:bg-orange-700 ' +
-            (props.className ?? '')
-      }
+      className={overrides?.className ? overrides.className : 'flex items-center justify-center rounded bg-orange-400 px-2 py-0.5 text-white hover:bg-orange-700 ' + (props.className ?? '')}
       type={props.type ? props.type : 'button'}
     >
-      {isLoading ? (
-        <Spinner sizeClassNames={spinnerSizeClassNames} />
-      ) : (
-        children
-      )}
+      {isLoading ? <Spinner sizeClassNames={spinnerSizeClassNames} /> : children}
     </button>
   );
 };

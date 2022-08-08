@@ -7,7 +7,7 @@
  */
 export const debouncePromiseValue = <T = unknown>(fn, timeout: number) => {
   let timeoutId;
-  return function(...args) {
+  return function (...args) {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }

@@ -49,11 +49,7 @@ export const projectRouter = createRouter()
     input: searchZod,
     async resolve({ ctx, input: { query } }) {
       // sigh typescript... It does not understand that 'insensitive' is a valid value
-      const whereClause:
-        | { name?: { contains?: string; mode?: 'insensitive' | 'default' } }
-        | undefined = query
-        ? { name: { contains: query, mode: 'insensitive' } }
-        : undefined;
+      const whereClause: { name?: { contains?: string; mode?: 'insensitive' | 'default' } } | undefined = query ? { name: { contains: query, mode: 'insensitive' } } : undefined;
       return ctx.prisma.project.findMany({
         where: whereClause,
       });
@@ -65,8 +61,7 @@ export const projectRouter = createRouter()
       clientId: z.string(),
     }),
     async resolve({ ctx, input: { name, clientId } }) {
-      if (!ctx.session?.user?.id)
-        return ctx.res?.status(401).json({ message: 'Unauthorized' });
+      if (!ctx.session?.user?.id) return ctx.res?.status(401).json({ message: 'Unauthorized' });
       const newProject = prisma?.project.create({
         data: {
           name,
@@ -102,9 +97,7 @@ export const projectRouter = createRouter()
     },
   })
   .mutation('update', {
-    input: identifiableZod.merge(
-      z.object({ name: z.string(), clientId: z.string() })
-    ),
+    input: identifiableZod.merge(z.object({ name: z.string(), clientId: z.string() })),
     async resolve({ ctx, input: { clientId, id, name } }) {
       return ctx.prisma.project.update({
         where: { id },

@@ -25,26 +25,19 @@ const ClientEditCreateForm: FC<{
   onFinish: () => void;
 }> = ({ onFinish, clientId = '' }) => {
   const queryInvalidator = trpc.useContext();
-  const { data: client } = trpc.useQuery(
-    ['clients.single', { clientId: clientId }],
-    { enabled: Boolean(clientId) }
-  );
+  const { data: client } = trpc.useQuery(['clients.single', { clientId: clientId }], { enabled: Boolean(clientId) });
 
-  const { isLoading, mutateAsync: createClient } = trpc.useMutation(
-    'clients.create',
-    {
-      onSuccess: () => {
-        queryInvalidator.invalidateQueries(['clients.all']);
-      },
-    }
-  );
+  const { isLoading, mutateAsync: createClient } = trpc.useMutation('clients.create', {
+    onSuccess: () => {
+      queryInvalidator.invalidateQueries(['clients.all']);
+    },
+  });
 
-  const { isLoading: isEditClientLoading, mutateAsync: updateClient } =
-    trpc.useMutation('clients.update', {
-      onSuccess: () => {
-        queryInvalidator.invalidateQueries(['clients.all']);
-      },
-    });
+  const { isLoading: isEditClientLoading, mutateAsync: updateClient } = trpc.useMutation('clients.update', {
+    onSuccess: () => {
+      queryInvalidator.invalidateQueries(['clients.all']);
+    },
+  });
 
   const {
     handleSubmit,
@@ -58,9 +51,7 @@ const ClientEditCreateForm: FC<{
   });
 
   const onSubmit = async (data: Inputs) => {
-    const createdClient = client?.id
-      ? await updateClient({ id: client.id, name: data.name })
-      : await createClient({ name: data.name });
+    const createdClient = client?.id ? await updateClient({ id: client.id, name: data.name }) : await createClient({ name: data.name });
     onFinish();
   };
 
@@ -73,18 +64,10 @@ const ClientEditCreateForm: FC<{
       <label htmlFor="name" className="font-medium">
         Name
       </label>
-      <input
-        {...register('name')}
-        className="rounded-md border border-solid border-gray-400 px-2 py-1 text-black"
-      />
+      <input {...register('name')} className="rounded-md border border-solid border-gray-400 px-2 py-1 text-black" />
       <FormValidationError error={errors.name} />
       <div className="flex gap-3">
-        <Button
-          type="submit"
-          className="flex-grow"
-          isLoading={isLoading}
-          disabled={isLoading}
-        >
+        <Button type="submit" className="flex-grow" isLoading={isLoading} disabled={isLoading}>
           {buttonLabel}
         </Button>
         <Button className="flex-grow" onClick={onFinish} disabled={isLoading}>
@@ -100,12 +83,7 @@ const AbsoluteDeleteButton: FC<{
   onClick: MouseEventHandler;
 }> = ({ isHovering, onClick }) => {
   return (
-    <button
-      className={`${
-        isHovering ? '' : 'hidden'
-      } absolute -top-3 -right-3 rounded-full border-2 border-solid border-gray-400 bg-red-300 p-1`}
-      onClick={onClick}
-    >
+    <button className={`${isHovering ? '' : 'hidden'} absolute -top-3 -right-3 rounded-full border-2 border-solid border-gray-400 bg-red-300 p-1`} onClick={onClick}>
       <MdDeleteOutline size={20} />
     </button>
   );
@@ -131,49 +109,31 @@ const ClientList: FC<{
     return <Spinner />;
   }
   if (!clients?.length) {
-    return (
-      <p className="pt-3 text-center text-base italic">No clients to show</p>
-    );
+    return <p className="pt-3 text-center text-base italic">No clients to show</p>;
   }
   const createClientClickHandler = (id: string) => () => onClientClick(id);
   const createClientDeleteHandler = (id: string) => () => onClientDelete(id);
 
   return (
-    <ul
-      className="flex flex-col items-center justify-center gap-3"
-      ref={parent}
-    >
+    <ul className="flex flex-col items-center justify-center gap-3" ref={parent}>
       {clients.map((c) => {
         const projectsCount = c.projects?.length ?? 0;
         const projectPlural = 'project' + (projectsCount > 1 ? 's' : '');
         return (
           <li
             key={c.id}
-            className={`relative w-full rounded border border-solid border-gray-600/50 hover:border-orange-400 sm:max-w-2xl ${
-              c.isActive ? '' : 'opacity-50'
-            }`}
+            className={`relative w-full rounded border border-solid border-gray-600/50 hover:border-orange-400 sm:max-w-2xl ${c.isActive ? '' : 'opacity-50'}`}
             onMouseEnter={createHoveringHandler(c.id)}
             onMouseLeave={removeHover}
           >
-            <button
-              className="flex w-full justify-between p-4"
-              type="button"
-              onClick={createClientClickHandler(c.id)}
-            >
+            <button className="flex w-full justify-between p-4" type="button" onClick={createClientClickHandler(c.id)}>
               <p className="font-semibold">
                 {c.name}
                 {c.isActive ? '' : <span className="italic"> (Inactive)</span>}
               </p>
-              <p>
-                {c.projects?.length
-                  ? `${c.projects.length} ${projectPlural}`
-                  : 'No projects for this client'}
-              </p>
+              <p>{c.projects?.length ? `${c.projects.length} ${projectPlural}` : 'No projects for this client'}</p>
             </button>
-            <AbsoluteDeleteButton
-              onClick={createClientDeleteHandler(c.id)}
-              isHovering={hoveringId === c.id}
-            />
+            <AbsoluteDeleteButton onClick={createClientDeleteHandler(c.id)} isHovering={hoveringId === c.id} />
           </li>
         );
       })}
@@ -185,21 +145,15 @@ const Clients: NextPageWithLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [currentClientId, setCurrentClientId] = useState('');
-  const { data: client } = trpc.useQuery(
-    ['clients.single', { clientId: currentClientId }],
-    {
-      enabled: Boolean(currentClientId),
-    }
-  );
+  const { data: client } = trpc.useQuery(['clients.single', { clientId: currentClientId }], {
+    enabled: Boolean(currentClientId),
+  });
   const queryClient = trpc.useContext();
-  const { isLoading: isDeleting, mutateAsync: deleteClient } = trpc.useMutation(
-    'clients.delete',
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['clients.all']);
-      },
-    }
-  );
+  const { isLoading: isDeleting, mutateAsync: deleteClient } = trpc.useMutation('clients.delete', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['clients.all']);
+    },
+  });
   const handleClose = () => {
     setIsOpen(false);
     setCurrentClientId('');
@@ -238,27 +192,16 @@ const Clients: NextPageWithLayout = () => {
         <Button onClick={handleOpen}>Add a client</Button>
       </section>
       <section className="pt-2">
-        <ClientList
-          onClientClick={handleClientClick}
-          onClientDelete={handleClientDelete}
-        />
+        <ClientList onClientClick={handleClientClick} onClientDelete={handleClientDelete} />
       </section>
       {isOpen && !clientIsLoading ? (
         <Modal onBackdropClick={handleClose}>
-          <ClientEditCreateForm
-            onFinish={handleClose}
-            clientId={currentClientId}
-          />
+          <ClientEditCreateForm onFinish={handleClose} clientId={currentClientId} />
         </Modal>
       ) : null}
       {isConfirmModalOpen ? (
         <Modal onBackdropClick={handleClose}>
-          <ConfirmForm
-            onConfirm={handleConfirmDelete}
-            onCancel={handleCancelDelete}
-            isConfirming={isDeleting}
-            body="Confirm deleting client"
-          />
+          <ConfirmForm onConfirm={handleConfirmDelete} onCancel={handleCancelDelete} isConfirming={isDeleting} body="Confirm deleting client" />
         </Modal>
       ) : null}
     </>

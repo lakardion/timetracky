@@ -1,17 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RoleType } from '@prisma/client';
-import {
-  CreateHourFormInputs,
-  CreateHourInputs,
-  createHourZodForm,
-} from 'common/validators';
+import { CreateHourFormInputs, CreateHourInputs, createHourZodForm } from 'common/validators';
 import { Button } from 'components/button';
 import { ConfirmForm } from 'components/confirm-form';
 import { FormValidationError, Input, TextArea } from 'components/form';
-import {
-  HoursCalendar,
-  RangeChangeEventHandler,
-} from 'components/hour-calendar';
+import { HoursCalendar, RangeChangeEventHandler } from 'components/hour-calendar';
 import { HourList } from 'components/hours/hour-list';
 import { DateFilter } from 'components/hours/types';
 import { Modal } from 'components/modal';
@@ -41,42 +34,29 @@ const searchProjects = async (value: string) => {
   const projects = await client.query('projects.search', { query: value });
   return projects.map((p) => ({ value: p.id, label: p.name }));
 };
-const debouncedSearchProjects: typeof searchProjects = debouncePromiseValue(
-  searchProjects,
-  500
-);
+const debouncedSearchProjects: typeof searchProjects = debouncePromiseValue(searchProjects, 500);
 
 const searchTags = async (value: string) => {
   const client = createTRPCVanillaClient();
   const tags = await client.query('tags.search', { query: value });
   return tags.map((t) => ({ value: t.id, label: t.name }));
 };
-const debouncedSearchTags: typeof searchTags = debouncePromiseValue(
-  searchTags,
-  500
-);
+const debouncedSearchTags: typeof searchTags = debouncePromiseValue(searchTags, 500);
 
-const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
-  hourId,
-  onFinishEdit,
-}) => {
+const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({ hourId, onFinishEdit }) => {
   const queryClient = trpc.useContext();
 
-  const { mutateAsync: createHour, isLoading: isHourCreating } =
-    trpc.useMutation('hours.create', {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['hours.withTagAndProjectInfinite']);
-        queryClient.invalidateQueries(['hours.hoursByDate']);
-      },
-    });
-  const { mutateAsync: editHour, isLoading: isHourEditing } = trpc.useMutation(
-    'hours.edit',
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['hours.withTagAndProjectInfinite']);
-      },
-    }
-  );
+  const { mutateAsync: createHour, isLoading: isHourCreating } = trpc.useMutation('hours.create', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['hours.withTagAndProjectInfinite']);
+      queryClient.invalidateQueries(['hours.hoursByDate']);
+    },
+  });
+  const { mutateAsync: editHour, isLoading: isHourEditing } = trpc.useMutation('hours.edit', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['hours.withTagAndProjectInfinite']);
+    },
+  });
   const { data: hour } = trpc.useQuery(['hours.single', { id: hourId ?? '' }], {
     enabled: Boolean(hourId),
     refetchOnWindowFocus: false,
@@ -132,24 +112,15 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
 
   return (
     <>
-      <form
-        className="relative flex flex-col justify-center gap-2 rounded-lg bg-gray-700 p-4 pb-5 text-white"
-        onSubmit={handleSubmit(onSubmit)}
-      >
+      <form className="relative flex flex-col justify-center gap-2 rounded-lg bg-gray-700 p-4 pb-5 text-white" onSubmit={handleSubmit(onSubmit)}>
         <BackdropSpinner isLoading={isHourEditing || isHourCreating} />
-        <h1 className="text-center text-2xl">
-          {hourId ? 'Edit hour entry' : 'Add an hour entry'}
-        </h1>
+        <h1 className="text-center text-2xl">{hourId ? 'Edit hour entry' : 'Add an hour entry'}</h1>
         <section aria-label="hour date" className="flex flex-wrap gap-3">
           <div className="flex flex-grow flex-col gap-2">
             <label htmlFor="value" className="font-medium">
               Value
             </label>
-            <Input
-              type="number"
-              {...register('value')}
-              placeholder="Value..."
-            />
+            <Input type="number" {...register('value')} placeholder="Value..." />
             <FormValidationError error={errors.value} />
           </div>
           <div className="flex flex-grow flex-col gap-2">
@@ -188,11 +159,7 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
         <label htmlFor="description" className="font-medium">
           Description
         </label>
-        <TextArea
-          {...register('description')}
-          placeholder="Describe the activity..."
-          className="flex-grow"
-        />
+        <TextArea {...register('description')} placeholder="Describe the activity..." className="flex-grow" />
         <FormValidationError error={errors.description} />
         <label htmlFor="tags" className="font-medium">
           Tags
@@ -219,17 +186,10 @@ const CreateEditHour: FC<{ hourId?: string; onFinishEdit: () => void }> = ({
         />
         <FormValidationError error={errors.tagIds} />
         <section className="flex justify-center gap-3 p-4">
-          <Button
-            type="submit"
-            isLoading={isHourEditing || isHourCreating}
-            className="flex-grow"
-          >
+          <Button type="submit" isLoading={isHourEditing || isHourCreating} className="flex-grow">
             {hourId ? 'Edit' : 'Add'}
           </Button>
-          <Button
-            className="flex-grow capitalize"
-            onClick={isDirty ? () => reset() : handleClose}
-          >
+          <Button className="flex-grow capitalize" onClick={isDirty ? () => reset() : handleClose}>
             {isDirty ? 'reset' : 'cancel'}
           </Button>
         </section>
@@ -250,9 +210,7 @@ const HourCalendarContainer: FC<{
   handleDateSelected: (date: Date[]) => void | undefined;
   datesSelected: Date[] | undefined;
 }> = ({ datesSelected, handleDateSelected }) => {
-  const [currentCalendarRange, setCurrentCalendarRange] = useState(
-    getMonthRangeForDate(new Date())
-  );
+  const [currentCalendarRange, setCurrentCalendarRange] = useState(getMonthRangeForDate(new Date()));
   const handleRangeChange: RangeChangeEventHandler = (range) => {
     if (Array.isArray(range)) return; //don't want to address this rn
     //! range comes UTC-centered so I have to localize that seems like. We only care about what day this happened we don't care what the time was
@@ -261,10 +219,7 @@ const HourCalendarContainer: FC<{
     const localizedEnd = localizeUTCDate(end);
     setCurrentCalendarRange({ start: localizedStart, end: localizedEnd });
   };
-  const { data: hoursByDate } = trpc.useQuery([
-    'hours.hoursByDate',
-    { dateFrom: currentCalendarRange.start, dateTo: currentCalendarRange.end },
-  ]);
+  const { data: hoursByDate } = trpc.useQuery(['hours.hoursByDate', { dateFrom: currentCalendarRange.start, dateTo: currentCalendarRange.end }]);
   const events: Event[] = useMemo(
     () =>
       hoursByDate?.map(
@@ -279,16 +234,8 @@ const HourCalendarContainer: FC<{
   );
 
   return (
-    <section
-      aria-label="calendar"
-      className=" flex justify-center lg:basis-8/12"
-    >
-      <HoursCalendar
-        events={events}
-        onRangeChange={handleRangeChange}
-        onSelectedChange={handleDateSelected}
-        selected={datesSelected}
-      />
+    <section aria-label="calendar" className=" flex justify-center lg:basis-8/12">
+      <HoursCalendar events={events} onRangeChange={handleRangeChange} onSelectedChange={handleDateSelected} selected={datesSelected} />
     </section>
   );
 };
@@ -334,11 +281,7 @@ const HoursMain = () => {
   const [datesSelected, setDatesSelected] = useState<Date[]>([]);
   const handleDateSelected = useCallback((dates: Date[]) => {
     setDatesSelected((ds) => {
-      return ds?.length === 1 &&
-        dates.length === 1 &&
-        isSameDay(ds[0]!, dates[0]!)
-        ? []
-        : dates;
+      return ds?.length === 1 && dates.length === 1 && isSameDay(ds[0]!, dates[0]!) ? [] : dates;
     });
   }, []);
 
@@ -359,10 +302,7 @@ const HoursMain = () => {
         <>
           go to{' '}
           <Link href="/projects">
-            <button
-              type="button"
-              className="text-blue-600 visited:text-purple-600 hover:underline"
-            >
+            <button type="button" className="text-blue-600 visited:text-purple-600 hover:underline">
               Projects
             </button>
           </Link>{' '}
@@ -371,52 +311,22 @@ const HoursMain = () => {
       ) : (
         'ask an administrator to add them'
       );
-    return (
-      <p className="text-center italic">
-        There are no projects created, {noProjectsMessage}
-      </p>
-    );
+    return <p className="text-center italic">There are no projects created, {noProjectsMessage}</p>;
   }
 
   return (
     <>
-      <section
-        aria-label="create edit hour form"
-        className="flex items-start  justify-center"
-      >
-        <CreateEditHour
-          hourId={editingHourId}
-          onFinishEdit={handleFinishEdit}
-        />
+      <section aria-label="create edit hour form" className="flex items-start  justify-center">
+        <CreateEditHour hourId={editingHourId} onFinishEdit={handleFinishEdit} />
       </section>
-      <section
-        className="flex flex-col gap-2 md:flex-grow lg:flex-row-reverse 2xl:flex-row-reverse"
-        aria-label="hours and calendar container"
-      >
-        <HourCalendarContainer
-          datesSelected={datesSelected}
-          handleDateSelected={handleDateSelected}
-        />
-        <section
-          aria-label="hours list"
-          className="relative flex flex-col items-center justify-start md:flex-grow md:basis-4/12"
-        >
-          <HourList
-            onHourDelete={onHourDelete}
-            onHourEdit={onHourEdit}
-            selectedHourId={editingHourId}
-            dateFilter={dateFilter}
-          />
+      <section className="flex flex-col gap-2 md:flex-grow lg:flex-row-reverse 2xl:flex-row-reverse" aria-label="hours and calendar container">
+        <HourCalendarContainer datesSelected={datesSelected} handleDateSelected={handleDateSelected} />
+        <section aria-label="hours list" className="relative flex flex-col items-center justify-start md:flex-grow md:basis-4/12">
+          <HourList onHourDelete={onHourDelete} onHourEdit={onHourEdit} selectedHourId={editingHourId} dateFilter={dateFilter} />
         </section>
         {showConfirmationModal ? (
           <Modal onBackdropClick={handleCloseConfirm}>
-            <ConfirmForm
-              body="Are you sure you want to delete an hour?"
-              onCancel={handleCloseConfirm}
-              onConfirm={handleSubmitDelete}
-              errorMessage={deleteError?.message}
-              isConfirming={isDeleting}
-            />
+            <ConfirmForm body="Are you sure you want to delete an hour?" onCancel={handleCloseConfirm} onConfirm={handleSubmitDelete} errorMessage={deleteError?.message} isConfirming={isDeleting} />
           </Modal>
         ) : null}
       </section>

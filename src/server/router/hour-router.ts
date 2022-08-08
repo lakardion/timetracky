@@ -5,10 +5,7 @@ import { cursorPaginationZod, DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'uti
 import { z } from 'zod';
 import { createRouter } from './context';
 
-const diffStrArrays = (
-  newValues: string[],
-  oldValues: string[]
-): [toCreate: string[], toDelete: string[]] => {
+const diffStrArrays = (newValues: string[], oldValues: string[]): [toCreate: string[], toDelete: string[]] => {
   const oldTagIdsSet = new Set(oldValues);
   const tagIdsSet = new Set(newValues);
   const disconnect: string[] = [];
@@ -50,26 +47,25 @@ export const hourRouter = createRouter()
     },
   })
   .query('withTagAndProjectInfinite', {
-    input: z.object({
-      dateFilter: z
-        .object({
-          from: z.date(),
-          to: z.date(),
-        })
-        .optional()
-        .or(z.date())
-    }).merge(cursorPaginationZod),
-    async resolve({
-      ctx,
-      input: { cursor, limit: clientLimit = DEFAULT_HOURS_PAGE_SIZE, dateFilter },
-    }) {
+    input: z
+      .object({
+        dateFilter: z
+          .object({
+            from: z.date(),
+            to: z.date(),
+          })
+          .optional()
+          .or(z.date()),
+      })
+      .merge(cursorPaginationZod),
+    async resolve({ ctx, input: { cursor, limit: clientLimit = DEFAULT_HOURS_PAGE_SIZE, dateFilter } }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'Need to be signed in to get this information',
         });
       }
-      const limit = cursor?.limit ? cursor.limit : clientLimit
+      const limit = cursor?.limit ? cursor.limit : clientLimit;
       let dateWhereClause = undefined;
       if (dateFilter instanceof Date) {
         dateWhereClause = dateFilter;
@@ -108,10 +104,7 @@ export const hourRouter = createRouter()
       });
       return {
         hours: hours.map((h) => ({ ...h, value: h.value.toNumber() })),
-        nextCursor:
-          Math.ceil(totalHours / limit) > cursor.page
-            ? { page: cursor.page + 1, limit }
-            : null,
+        nextCursor: Math.ceil(totalHours / limit) > cursor.page ? { page: cursor.page + 1, limit } : null,
       };
     },
   })
@@ -127,8 +120,7 @@ export const hourRouter = createRouter()
       if (!currentUser) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
-          message:
-            'You must be logged with the same user you are doing the request for',
+          message: 'You must be logged with the same user you are doing the request for',
         });
       }
       const hours = await ctx.prisma.hour.findMany({
@@ -152,10 +144,7 @@ export const hourRouter = createRouter()
   })
   .mutation('create', {
     input: createHourZod,
-    async resolve({
-      ctx,
-      input: { date, description, projectId, tagIds, value },
-    }) {
+    async resolve({ ctx, input: { date, description, projectId, tagIds, value } }) {
       if (!ctx.session?.user?.id) {
         return ctx.res?.status(401).json({ message: 'Unauthorized' });
       }
@@ -177,25 +166,18 @@ export const hourRouter = createRouter()
     },
   })
   .mutation('edit', {
-    input: z
-      .object({ id: z.string(), oldTagIds: z.array(z.string()) })
-      .extend(createHourZod.shape),
-    async resolve({
-      ctx,
-      input: { id, date, description, projectId, tagIds, value, oldTagIds },
-    }) {
+    input: z.object({ id: z.string(), oldTagIds: z.array(z.string()) }).extend(createHourZod.shape),
+    async resolve({ ctx, input: { id, date, description, projectId, tagIds, value, oldTagIds } }) {
       //! we need to know about the old tagIds so that we diff them, otherwise we can't replace relations looks like...
       //? should we do this in the client?
       const [toConnect, toDisconnect] = diffStrArrays(tagIds, oldTagIds);
 
-      const createManyQuery = toConnect?.length
-        ? { data: toConnect.map((c) => ({ tagId: c })) }
-        : undefined;
+      const createManyQuery = toConnect?.length ? { data: toConnect.map((c) => ({ tagId: c })) } : undefined;
       //todo check if this can be replaced (or is the same) as deleteMany
       const deleteManyQuery = toDisconnect?.length
         ? toDisconnect.map((d) => ({
-          tagId: d,
-        }))
+            tagId: d,
+          }))
         : undefined;
 
       const edited = await ctx.prisma.hour.update({
@@ -220,37 +202,41 @@ export const hourRouter = createRouter()
     async resolve({ ctx, input: { id } }) {
       return ctx.prisma.hour.delete({ where: { id } });
     },
-  }).query('hourExceptionsInfinite', {
+  })
+  .query('hourExceptionsInfinite', {
     input: cursorPaginationZod,
     async resolve({ ctx, input: { cursor, limit: clientLimit = DEFAULT_HOURS_PAGE_SIZE } }) {
-      const limit = cursor?.limit ? cursor.limit : clientLimit
+      const limit = cursor?.limit ? cursor.limit : clientLimit;
       const hourExceptions = await ctx.prisma.hourException.findMany({
         orderBy: {
-          date: 'desc'
+          date: 'desc',
         },
         take: limit,
-        skip: (cursor.page - 1) * limit
-      })
-      const nextCursor = hourExceptions.length === limit ? { page: cursor.page + 1, limit } : null
+        skip: (cursor.page - 1) * limit,
+      });
+      const nextCursor = hourExceptions.length === limit ? { page: cursor.page + 1, limit } : null;
       return {
-        hourExceptions, nextCursor
-      }
-    }
-  }).mutation('createException', {
+        hourExceptions,
+        nextCursor,
+      };
+    },
+  })
+  .mutation('createException', {
     input: z.object({
       hours: z.number(),
       date: z.date(),
-      type: z.nativeEnum(HourExceptionType)
-    }), async resolve({ ctx, input: { hours, date, type } }) {
-      if (!ctx.session?.user?.id) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Must be logged in to perform this request' })
+      type: z.nativeEnum(HourExceptionType),
+    }),
+    async resolve({ ctx, input: { hours, date, type } }) {
+      if (!ctx.session?.user?.id) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Must be logged in to perform this request' });
       const hourException = await ctx.prisma.hourException.create({
         data: {
           hours: hours,
           userId: ctx.session.user.id,
           date,
           type,
-        }
-      })
-      return hourException
-    }
+        },
+      });
+      return hourException;
+    },
   });

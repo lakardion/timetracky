@@ -1,20 +1,7 @@
-import {
-  Calendar,
-  dateFnsLocalizer,
-  Event,
-  SlotInfo,
-  View,
-} from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, Event, SlotInfo, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, isSameDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import {
-  FC,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { FC, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 const LG_WIDTH_BREAKPOINT_PX = 1024;
 
@@ -46,10 +33,7 @@ function useWindowSize() {
   return size;
 }
 
-export type RangeChangeEventHandler = (
-  range: Date[] | { start: Date; end: Date },
-  view?: View
-) => void | undefined;
+export type RangeChangeEventHandler = (range: Date[] | { start: Date; end: Date }, view?: View) => void | undefined;
 
 export const HoursCalendar: FC<{
   events: Event[];
@@ -58,14 +42,7 @@ export const HoursCalendar: FC<{
   onChange?: (date: Date) => void;
   selected?: Date[];
   onSelectedChange?: (dates: Date[]) => void;
-}> = ({
-  events,
-  onRangeChange,
-  value: controlledValue,
-  onChange: controlledOnChange,
-  onSelectedChange: controlledOnSelectedChange,
-  selected: controlledSelected,
-}) => {
+}> = ({ events, onRangeChange, value: controlledValue, onChange: controlledOnChange, onSelectedChange: controlledOnSelectedChange, selected: controlledSelected }) => {
   const [uncontrolledValue, setUncontrolledValue] = useState(new Date());
   const [uncontrolledSelected, setUncontrolledSelected] = useState<Date[]>([]);
 
@@ -82,22 +59,13 @@ export const HoursCalendar: FC<{
     };
   }, [controlledOnChange]);
 
-  const handleSelectedChange = useMemo(
-    () => controlledOnSelectedChange || setUncontrolledSelected,
-    [controlledOnSelectedChange]
-  );
+  const handleSelectedChange = useMemo(() => controlledOnSelectedChange || setUncontrolledSelected, [controlledOnSelectedChange]);
 
-  const selected = useMemo(
-    () => controlledSelected || uncontrolledSelected,
-    [controlledSelected, uncontrolledSelected]
-  );
+  const selected = useMemo(() => controlledSelected || uncontrolledSelected, [controlledSelected, uncontrolledSelected]);
 
   const handleSlotSelect = (slotInfo: SlotInfo) => {
     const { action, start, slots } = slotInfo;
-    const callbackByAction: Record<
-      'click' | 'doubleClick' | 'select',
-      () => void
-    > = {
+    const callbackByAction: Record<'click' | 'doubleClick' | 'select', () => void> = {
       click: () => {
         handleSelectedChange(slots);
         handleNavigate(start);
@@ -122,8 +90,7 @@ export const HoursCalendar: FC<{
 
   const dayPropGetter = useCallback(
     (date: Date) => {
-      if (selected.some((s) => isSameDay(s, date)))
-        return { className: 'bg-orange-300/20' };
+      if (selected.some((s) => isSameDay(s, date))) return { className: 'bg-orange-300/20' };
       return { className: '' };
     },
     [selected]
@@ -137,9 +104,7 @@ export const HoursCalendar: FC<{
         startAccessor="start"
         endAccessor="end"
         views={views}
-        className={
-          'h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] lg:px-3 2xl:w-full'
-        }
+        className={'h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] lg:px-3 2xl:w-full'}
         onRangeChange={onRangeChange}
         date={value}
         onNavigate={handleNavigate}

@@ -35,10 +35,7 @@ export const authRouter = createRouter()
       });
       return users.map((u) => {
         const maskedEmail = maskEmail(u.email ?? '');
-        const hourCount = u.hours.reduce(
-          (sum, h) => sum + h.value.toNumber(),
-          0
-        );
+        const hourCount = u.hours.reduce((sum, h) => sum + h.value.toNumber(), 0);
         const projectCount = u.projects.length;
         return {
           id: u.id,

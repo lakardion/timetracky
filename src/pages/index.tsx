@@ -6,9 +6,7 @@ import { useRouter } from 'next/router';
 import { trpc } from '../utils/trpc';
 
 const Home: NextPage = () => {
-  const { data: session, isLoading: isSessionLoading } = trpc.useQuery([
-    'auth.getSession',
-  ]);
+  const { data: session, isLoading: isSessionLoading } = trpc.useQuery(['auth.getSession']);
   const router = useRouter();
   if (isSessionLoading) {
     return <CenteredSpinner />;

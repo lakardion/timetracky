@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const dateInputValidateZod = z.string().refine((date) => {
   if (!isMatch(date, 'yyyy-MM-dd')) return false;
   return true;
-}, 'Required')
+}, 'Required');
 
 export const identifiableZod = z.object({
   id: z.string().min(1, 'Required'),
@@ -38,6 +38,8 @@ export const createTagZod = z.object({
 });
 export type CreateTagInputs = z.infer<typeof createTagZod>;
 
-export const searchZod = z.object({
-  query: z.string().optional()
-}).default({})
+export const searchZod = z
+  .object({
+    query: z.string().optional(),
+  })
+  .default({});
