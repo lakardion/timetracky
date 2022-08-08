@@ -135,4 +135,6 @@ model HourException {
 enum HourExceptionType {
   VACATION
   TIME_OFF
+  HOLIDAY_WORK
 }
+
