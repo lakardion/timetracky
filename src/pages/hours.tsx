@@ -314,6 +314,8 @@ const HoursMain = () => {
     return <p className="text-center italic">There are no projects created, {noProjectsMessage}</p>;
   }
 
+  //TODO: rework responsiveness for laptop-size screens
+
   return (
     <>
       <section aria-label="create edit hour form" className="flex items-start  justify-center">

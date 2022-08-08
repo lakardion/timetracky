@@ -21,7 +21,7 @@ const TimeOffList = () => {
       return lastPage.nextCursor;
     },
   });
-  //TODO: manage virtualization and attach listener for virtual fetchnext page
+  //TODO: manage virtualization and attach listener for virtual fetchnext page. We could even do pagination the old-school way. With month filtering
   const allPages = useMemo(() => {
     return data?.pages.flatMap((p) => p.hourExceptions) ?? [];
   }, [data?.pages]);
@@ -156,9 +156,11 @@ const TimeOff = () => {
 
   return (
     <>
-      <section className="flex w-full flex-col gap-3 md:m-auto md:max-w-[60%]">
+      <section className="flex w-full flex-col gap-3 md:m-auto md:max-w-[50%]">
         <p className="text-center font-medium">Request a day off</p>
-        <Button onClick={handleCreateDayOff}>Add days off</Button>
+        <div className="flex justify-center">
+          <Button onClick={handleCreateDayOff}>Add days off</Button>
+        </div>
         <TimeOffList />
         {showCreateModal ? (
           <Modal onBackdropClick={hideCreateModal}>
