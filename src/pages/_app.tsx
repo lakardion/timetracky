@@ -22,10 +22,11 @@ type AppPropsWithLayout = AppProps & {
 
 const MyApp = ({ Component, pageProps: { session, ...pageProps } }: AppPropsWithLayout) => {
   const getLayout = Component.getLayout ?? ((page) => page);
+
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
       </Head>
       <SessionProvider session={session}>
         <Layout>{getLayout(<Component {...pageProps} />)}</Layout>

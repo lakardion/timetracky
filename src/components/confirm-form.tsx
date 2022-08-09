@@ -13,10 +13,10 @@ export const ConfirmForm: FC<{
       <h1 className="text-center text-3xl">Are you sure?</h1>
       <p className="text-center text-sm">{body}</p>
       <section aria-label="action buttons" className="flex gap-3">
-        <Button onClick={onConfirm} isLoading={isConfirming} spinnerSizeClassNames="w-6 h-6" className="flex-grow">
+        <Button className="flex-grow" isLoading={isConfirming} spinnerSizeClassNames="w-6 h-6" onClick={onConfirm}>
           Confirm
         </Button>
-        <Button onClick={onCancel} className="flex-grow">
+        <Button className="flex-grow" onClick={onCancel}>
           Cancel
         </Button>
       </section>

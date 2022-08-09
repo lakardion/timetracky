@@ -22,5 +22,6 @@ export const AuthGuard: FC<{
   if (!session || !hasProperRole) {
     return <NotFound />;
   }
+
   return <>{children}</>;
 };

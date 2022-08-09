@@ -24,8 +24,10 @@ const TimeOffList = () => {
   const allPages = useMemo(() => {
     return data?.pages.flatMap((p) => p.hourExceptions) ?? [];
   }, [data?.pages]);
+
   if (isLoading) return <Spinner />;
   if (!allPages.length) return <p className="italic">No days off registered </p>;
+
   return (
     <ul className="flex flex-col gap-3">
       {allPages.map((to) => (
@@ -61,6 +63,7 @@ const timeOffZod = z.object({
   }),
   date: dateInputValidateZod,
 });
+
 type TimeOffInputs = z.infer<typeof timeOffZod>;
 type test = z.infer<typeof workHourExceptionZod>;
 
@@ -92,6 +95,7 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
     });
     const result = zod.safeParse(reqBody);
     const created = await create(reqBody);
+
     onFinished();
   };
 
@@ -105,12 +109,12 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <label htmlFor="date">Date</label>
       <Input type="date" {...register('date')} />
       <FormValidationError error={errors.date} />
       <label htmlFor="hours">Hours</label>
-      <Input type="text" placeholder="Hours..." {...register('hours')} />
+      <Input placeholder="Hours..." type="text" {...register('hours')} />
       <FormValidationError error={errors.hours} />
       <label htmlFor="hourType"></label>
       <Controller
@@ -119,22 +123,22 @@ const TimeOffForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
         render={({ field }) => (
           <ReactSelect<OptionValueLabel<WorkHourException>>
             ref={field.ref}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            value={field.value}
-            options={hourExceptionTypeOptions}
             className="text-black"
-            placeholder="Select a type of absence"
             formatOptionLabel={(option) => <p>{option?.value ? mapHourExceptionTypeToLabel[option.value] : 'No option selected'}</p>}
+            options={hourExceptionTypeOptions}
+            placeholder="Select a type of absence"
+            value={field.value}
+            onBlur={field.onBlur}
+            onChange={field.onChange}
           />
         )}
       />
       <FormValidationError error={errors.hourType} />
       <section className="flex gap-3">
-        <Button type="submit" className="flex-grow">
+        <Button className="flex-grow" type="submit">
           Create
         </Button>
-        <Button type="button" onClick={onFinished} className="flex-grow">
+        <Button className="flex-grow" type="button" onClick={onFinished}>
           Cancel
         </Button>
       </section>

@@ -10,6 +10,7 @@ const useBrowserAwareBackdrop = () => {
     const agent = window.navigator.userAgent;
     const isFirefox = agent.indexOf('Firefox') !== -1;
     const blurOrBackdrop = isFirefox ? 'bg-gray-300/50' : 'bg-transparent backdrop-blur-sm';
+
     setBlurOrBackdrop(blurOrBackdrop);
   }, []);
 

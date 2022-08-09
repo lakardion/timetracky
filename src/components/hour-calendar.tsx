@@ -22,14 +22,17 @@ const localizer = dateFnsLocalizer({
  */
 function useWindowSize() {
   const [size, setSize] = useState([0, 0]);
+
   useLayoutEffect(() => {
     function updateSize() {
       setSize([window.innerWidth, window.innerHeight]);
     }
     window.addEventListener('resize', updateSize);
     updateSize();
+
     return () => window.removeEventListener('resize', updateSize);
   }, []);
+
   return size;
 }
 
@@ -48,12 +51,14 @@ export const HoursCalendar: FC<{
 
   const value = useMemo(() => {
     if (controlledValue) return controlledValue;
+
     return uncontrolledValue;
   }, [controlledValue, uncontrolledValue]);
   const handleDateChange = () => {};
 
   const handleNavigate = useMemo(() => {
     if (controlledOnChange) return controlledOnChange;
+
     return (newDate: Date) => {
       setUncontrolledValue(newDate);
     };
@@ -75,6 +80,7 @@ export const HoursCalendar: FC<{
         handleSelectedChange(slots);
       },
     };
+
     callbackByAction[action]?.();
   };
 
@@ -82,15 +88,18 @@ export const HoursCalendar: FC<{
 
   const views = useMemo(() => {
     const [w, h] = size;
+
     if (w && w > LG_WIDTH_BREAKPOINT_PX) {
       return { month: true, week: true };
     }
+
     return { month: true };
   }, [size]);
 
   const dayPropGetter = useCallback(
     (date: Date) => {
       if (selected.some((s) => isSameDay(s, date))) return { className: 'bg-orange-300/20' };
+
       return { className: '' };
     },
     [selected]
@@ -99,20 +108,20 @@ export const HoursCalendar: FC<{
   return (
     <>
       <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        views={views}
-        className={'h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] lg:px-3 2xl:w-full'}
-        onRangeChange={onRangeChange}
-        date={value}
-        onNavigate={handleNavigate}
-        onSelectSlot={handleSlotSelect}
         popup
         selectable
+        className={'h-[300px] w-[300px]  lg:h-[600px] lg:w-[700px] lg:px-3 2xl:w-full'}
+        date={value}
         dayPropGetter={dayPropGetter}
         drilldownView={null}
+        endAccessor="end"
+        events={events}
+        localizer={localizer}
+        startAccessor="start"
+        views={views}
+        onNavigate={handleNavigate}
+        onRangeChange={onRangeChange}
+        onSelectSlot={handleSlotSelect}
       />
     </>
   );

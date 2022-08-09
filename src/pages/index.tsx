@@ -8,6 +8,7 @@ import { trpc } from '../utils/trpc';
 const Home: NextPage = () => {
   const { data: session, isLoading: isSessionLoading } = trpc.useQuery(['auth.getSession']);
   const router = useRouter();
+
   if (isSessionLoading) {
     return <CenteredSpinner />;
   }
@@ -20,6 +21,7 @@ const Home: NextPage = () => {
     );
   } else {
     if (router.asPath === '/') router.push('/hours');
+
     return <CenteredSpinner />;
   }
 };

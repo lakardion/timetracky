@@ -22,6 +22,7 @@ const HolidayWorkForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
         .refine(refineStringIsNumberFn, 'Invalid number format')
         .refine((v: string) => {
           const number = parseInt(v);
+
           return me?.workingHours && number <= me.workingHours / WORK_DAYS_IN_WEEK;
         }, 'Cannot request more hours than you usually work')
         .refine((v: string) => {
@@ -31,6 +32,7 @@ const HolidayWorkForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
       dateOption: z.object({ value: z.string(), label: z.string(), description: z.string() }),
     });
   }, [me?.workingHours]);
+
   type HolidayWorkInput = z.infer<typeof holidayWorkZod>;
 
   const { data: holidays, isLoading: isHolidaysLoading } = trpc.useQuery(['gcal.holidays']);
@@ -57,23 +59,23 @@ const HolidayWorkForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
   }, [holidays]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-3xl">Register a holiday work</h1>
       <Controller
         control={control}
         name="dateOption"
         render={({ field }) => (
           <ReactSelect
-            options={holidayOptions}
             className="text-black"
+            isLoading={isHolidaysLoading}
+            loadingMessage={() => <p>Getting holidays...</p>}
+            options={holidayOptions}
+            value={field.value}
+            onBlur={field.onBlur}
             onChange={(option) => {
               field.onChange(option);
               setValue('description', option?.description ?? '');
             }}
-            onBlur={field.onBlur}
-            value={field.value}
-            isLoading={isHolidaysLoading}
-            loadingMessage={() => <p>Getting holidays...</p>}
           />
         )}
       />
@@ -81,19 +83,19 @@ const HolidayWorkForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
       <div className="flex w-full justify-between">
         <label htmlFor="hours">Hours</label>
         <div className="flex items-center justify-center gap-3">
-          <label htmlFor="isAllDay" className="text-sm">
+          <label className="text-sm" htmlFor="isAllDay">
             All day
           </label>
-          <input name="isAllDay" type="checkbox" value={isAllDay.toString()} checked={isAllDay} onChange={handleIsAllDayChange} />
+          <input checked={isAllDay} name="isAllDay" type="checkbox" value={isAllDay.toString()} onChange={handleIsAllDayChange} />
         </div>
       </div>
       <Input placeholder="Hours..." {...register('hours')} disabled={isAllDay} />
       <FormValidationError error={errors.hours} />
       <section aria-label="action buttons" className="flex gap-2">
-        <Button type="submit" className="flex-grow">
+        <Button className="flex-grow" type="submit">
           Confirm
         </Button>
-        <Button onClick={onFinished} className="flex-grow">
+        <Button className="flex-grow" onClick={onFinished}>
           Cancel
         </Button>
       </section>

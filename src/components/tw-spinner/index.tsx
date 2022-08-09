@@ -25,6 +25,7 @@ export const BackdropSpinner: FC<{
   spinnerSizeClassNames?: string;
 }> = ({ isLoading, spinnerSizeClassNames = 'w-8 h-8' }) => {
   if (!isLoading) return null;
+
   return (
     <div className="absolute flex h-full w-full items-center justify-center self-center">
       <div className="h-full w-full bg-gray-300" style={{ opacity: '50%' }}></div>

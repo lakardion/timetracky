@@ -34,6 +34,7 @@ const useVirtualizedInfiniteHourList = (dateFilter?: DateFilter | Date) => {
     overscan: 5,
     debug: true,
   });
+
   useEffect(
     () => {
       const [lastItem] = [...getVirtualItems()].reverse();
@@ -57,6 +58,7 @@ const useVirtualizedInfiniteHourList = (dateFilter?: DateFilter | Date) => {
       getVirtualItems(),
     ]
   );
+
   return useMemo(
     () => ({
       rVirtualRef,
@@ -100,7 +102,7 @@ export const HourList: FC<{
   return (
     <>
       <h1 className="pb-2 text-2xl">{dateFilterParse}</h1>
-      <section aria-label="scrollable hours container" className="h-[700px] w-full overflow-auto md:max-w-[700px] 2xl:h-full" ref={rVirtualRef}>
+      <section ref={rVirtualRef} aria-label="scrollable hours container" className="h-[700px] w-full overflow-auto md:max-w-[700px] 2xl:h-full">
         <ul
           className={`relative w-full`}
           style={{
@@ -113,18 +115,20 @@ export const HourList: FC<{
             const isLoaderRow = virtualRow.index > allRows.length - 1;
             const h = allRows[virtualRow.index];
             const liClassName = h ? `absolute top-0 left-0 w-full` : '';
+
             if (virtualRow.start === undefined || !h) return null;
+
             return (
               <HourItem
                 key={h.id}
                 className={liClassName}
                 hour={h}
-                isSelected={selectedHourId === h.id}
                 hoverHandlers={{
                   isHovering: hoveringId === h?.id,
                   onMouseEnter: h ? createHoverHandler(h.id) : undefined,
                   onMouseLeave: h ? createHoverHandler('') : undefined,
                 }}
+                isSelected={selectedHourId === h.id}
                 pagination={{
                   hasNextPage,
                 }}

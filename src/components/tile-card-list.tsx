@@ -19,8 +19,8 @@ export const TileCardList: FC<{ cards: LinkCard[] }> = ({ cards }) => {
       {cards.map((ac) => (
         <li key={ac.href}>
           <Link href={`${asPath}/${ac.href}`}>
-            <button type="button" className="hover:opacity-60">
-              <TileCard title={ac.title} description={ac.description} icon={ac.icon} />
+            <button className="hover:opacity-60" type="button">
+              <TileCard description={ac.description} icon={ac.icon} title={ac.title} />
             </button>
           </Link>
         </li>

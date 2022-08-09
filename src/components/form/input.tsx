@@ -7,8 +7,8 @@ export const Input: FC<InputHTMLAttributes<HTMLInputElement>> = forwardRef((prop
   return (
     <input
       {...props}
-      className="h-9 rounded-md border border-solid border-gray-400 px-2 py-1 text-black placeholder:text-gray-500/80 focus:outline-none focus:ring-2 focus:ring-orange-400"
       ref={ref}
+      className="h-9 rounded-md border border-solid border-gray-400 px-2 py-1 text-black placeholder:text-gray-500/80 focus:outline-none focus:ring-2 focus:ring-orange-400"
     />
   );
 });

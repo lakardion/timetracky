@@ -31,7 +31,7 @@ const LoginActions = () => {
         <p className="hidden sm:inline-flex">Welcome</p>
         <button className="flex items-center gap-1 hover:text-orange-400" type="button" onClick={handleGoToProfile}>
           {session.user?.name}
-          <Image src={session.user?.image ?? ''} width={30} height={30} alt="user image" className="rounded-full" />
+          <Image alt="user image" className="rounded-full" height={30} src={session.user?.image ?? ''} width={30} />
         </button>
       </div>
       <Button onClick={handleLogout}>Logout</Button>
@@ -79,13 +79,15 @@ const NavigationLinkList = () => {
   });
 
   if (!user) return null;
+
   return (
     <ul className="flex gap-3 py-2 pl-2">
       {routes.flatMap((r) => {
         if (r.roleRequired === 'ADMIN' && user?.roleType !== 'ADMIN') return [];
+
         return [
-          <Link href={`/${r.href}`} key={r.key}>
-            <button type="button" className={`text-white hover:text-orange-400 ${pathname.includes('/' + r.href) ? 'text-orange-400' : ''}`}>
+          <Link key={r.key} href={`/${r.href}`}>
+            <button className={`text-white hover:text-orange-400 ${pathname.includes('/' + r.href) ? 'text-orange-400' : ''}`} type="button">
               {r.label}
             </button>
           </Link>,
@@ -97,6 +99,7 @@ const NavigationLinkList = () => {
 
 const NavigationBar = () => {
   const { status, data: session } = useSession();
+
   if (status === 'loading') {
     return null;
   }
@@ -109,6 +112,7 @@ const NavigationBar = () => {
     </aside>
   );
 };
+
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const { data: session } = trpc.useQuery(['auth.getSession']);
 

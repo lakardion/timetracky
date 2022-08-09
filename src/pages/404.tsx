@@ -8,6 +8,7 @@ const NotFound = () => {
   const signInToGoogle = () => {
     signIn('google');
   };
+
   return (
     <main className="flex h-full w-full flex-col items-center justify-center gap-3">
       <h1 className="text-4xl font-medium">Whoops, nothing around here</h1>

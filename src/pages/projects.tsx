@@ -31,9 +31,11 @@ const createProjectFormZod = z.object({
         const result = await client.query('projects.exists', {
           search: value,
         });
+
         return !result;
       } catch (error) {
         console.error(error);
+
         return false;
       }
     }, 'Project name already exists, please choose another'),
@@ -92,6 +94,7 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({ onFinished
   const handleSelectChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
     if (e.target.value === '-1') {
       setSelectClassName(placeholderTextClass);
+
       return;
     }
     setSelectClassName('');
@@ -99,45 +102,46 @@ const CreateEditForm: FC<{ onFinished: () => void; id: string }> = ({ onFinished
 
   const clientOptions = useMemo(() => {
     if (!clients) return [];
+
     return clients.map((c) => ({ value: c.id, label: c.name }));
   }, [clients]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-grow flex-col justify-between gap-3">
+    <form className="flex flex-grow flex-col justify-between gap-3" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-3xl font-semibold">{id ? 'Edit project' : 'Create project'}</h1>
-      <label htmlFor="name" className="font-medium">
+      <label className="font-medium" htmlFor="name">
         Name
       </label>
       <Input placeholder="Name" {...register('name')} />
       <FormValidationError error={errors.name} />
-      <label htmlFor="clientId" className="font-medium">
+      <label className="font-medium" htmlFor="clientId">
         Client
       </label>
       <Controller
-        name="clientId"
         control={control}
         defaultValue={undefined}
+        name="clientId"
         render={({ field }) => (
           <ReactSelect
-            options={clientOptions}
             ref={field.ref}
-            onBlur={field.onBlur}
             className="text-black"
             classNamePrefix={'timetracky'}
+            options={clientOptions}
+            placeholder="Select a client..."
             value={clientOptions.find((co) => co.value === field.value) ?? null}
+            onBlur={field.onBlur}
             onChange={(value) => {
               field.onChange(value?.value);
             }}
-            placeholder="Select a client..."
           />
         )}
       />
       <FormValidationError error={errors.clientId} />
       <section className="flex gap-2">
-        <Button className="flex-grow" type="submit" isLoading={isCreating || isUpdating} disabled={isCreating || isUpdating}>
+        <Button className="flex-grow" disabled={isCreating || isUpdating} isLoading={isCreating || isUpdating} type="submit">
           {id ? 'Edit project' : 'Create project'}
         </Button>
-        <Button className="flex-grow" onClick={onFinished} disabled={isCreating || isUpdating}>
+        <Button className="flex-grow" disabled={isCreating || isUpdating} onClick={onFinished}>
           Cancel
         </Button>
       </section>
@@ -176,11 +180,13 @@ const ProjectList: FC<{
   const clearHover = () => {
     setHoveringId('');
   };
+
   return (
-    <ul className="flex flex-col items-center justify-center gap-3" ref={parent}>
+    <ul ref={parent} className="flex flex-col items-center justify-center gap-3">
       {projects.map((p) => {
         const hoursCount = p.hours?.length ?? 0;
         const hourPlural = 'h' + (hoursCount > 1 ? 's' : '');
+
         return (
           <li
             key={p.id}
@@ -194,16 +200,16 @@ const ProjectList: FC<{
             </section>
             <section aria-label="project hours">{hoursCount ? `${hoursCount} ${hourPlural}` : 'No hours'}</section>
             {hoveringId === p.id ? (
-              <div className="absolute -right-3 -top-3 flex items-center justify-center gap-1 rounded" aria-label="hour actions">
-                <button type="button" onClick={createEditHandler(p.id)} className="rounded-full bg-red-300 p-1">
+              <div aria-label="hour actions" className="absolute -right-3 -top-3 flex items-center justify-center gap-1 rounded">
+                <button className="rounded-full bg-red-300 p-1" type="button" onClick={createEditHandler(p.id)}>
                   <MdOutlineModeEditOutline className="fill-gray-900 hover:fill-orange-700" size={20} />
                 </button>
-                <button type="button" onClick={createDeleteHandler(p.id)} className="rounded-full bg-red-300 p-1">
+                <button className="rounded-full bg-red-300 p-1" type="button" onClick={createDeleteHandler(p.id)}>
                   <MdDeleteOutline className="fill-gray-900 hover:fill-orange-700" size={20} />
                 </button>
               </div>
             ) : (
-              <div className="absolute right-3 top-1 lg:hidden" aria-label="display hour actions">
+              <div aria-label="display hour actions" className="absolute right-3 top-1 lg:hidden">
                 <button type="button" onClick={createHoverHandler(p.id)}>
                   <FaEllipsisH size={15} />
                 </button>
@@ -267,7 +273,7 @@ const Projects: NextPageWithLayout = () => {
           <p className="text-center text-base italic">
             No clients found.{' '}
             <Link href="/administration/clients">
-              <button type="button" className="text-blue-600 visited:text-purple-500 hover:underline">
+              <button className="text-blue-600 visited:text-purple-500 hover:underline" type="button">
                 Clients
               </button>
             </Link>{' '}
@@ -285,18 +291,18 @@ const Projects: NextPageWithLayout = () => {
       </div>
       <ProjectList onDelete={handleShowDeleteconfirmation} onEdit={handleEdit} />
       {showAddProject && (
-        <Modal onBackdropClick={handleFinished} className="flex flex-col md:min-h-[300px] md:min-w-[400px]">
-          <CreateEditForm onFinished={handleFinished} id={currentProjectId} />
+        <Modal className="flex flex-col md:min-h-[300px] md:min-w-[400px]" onBackdropClick={handleFinished}>
+          <CreateEditForm id={currentProjectId} onFinished={handleFinished} />
         </Modal>
       )}
       {showConfirmation && (
         <Modal onBackdropClick={handleConfirmationClose}>
           <ConfirmForm
             body="Are you sure you want to delete this project?"
-            onCancel={handleConfirmationClose}
-            onConfirm={handleSubmitDelete}
             errorMessage={deleteError?.message}
             isConfirming={isDeleting}
+            onCancel={handleConfirmationClose}
+            onConfirm={handleSubmitDelete}
           />
         </Modal>
       )}

@@ -73,7 +73,7 @@ export const HourItem: FC<HourItemProps> = ({ className, hour, isSelected, pagin
               <h1 className="text-2xl">{hour.project.name}</h1>
               <ul className="flex flex-wrap gap-3 pt-1">
                 {hour.tags.flatMap((t, idx) => {
-                  return <PillListItem content={t.tag.name} key={t.tag.id} />;
+                  return <PillListItem key={t.tag.id} content={t.tag.name} />;
                 })}
               </ul>
             </section>
@@ -84,7 +84,7 @@ export const HourItem: FC<HourItemProps> = ({ className, hour, isSelected, pagin
             <p>{formatRelative(new Date(hour.updatedAt), new Date())}</p>
           </section>
           {hoverHandlers.isHovering ? (
-            <div className="absolute right-4 top-1 flex items-center justify-center gap-1 rounded" aria-label="hour actions">
+            <div aria-label="hour actions" className="absolute right-4 top-1 flex items-center justify-center gap-1 rounded">
               <button type="button" onClick={onEditHour}>
                 <MdOutlineModeEditOutline className="fill-gray-900 hover:fill-orange-700" size={28} />
               </button>
@@ -93,7 +93,7 @@ export const HourItem: FC<HourItemProps> = ({ className, hour, isSelected, pagin
               </button>
             </div>
           ) : (
-            <div className="absolute right-6 top-4 sm:hidden" aria-label="display hour actions">
+            <div aria-label="display hour actions" className="absolute right-6 top-4 sm:hidden">
               <button type="button" onClick={hoverHandlers.onMouseEnter}>
                 <FaEllipsisH size={15} />
               </button>

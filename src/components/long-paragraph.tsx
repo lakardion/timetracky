@@ -7,6 +7,7 @@ const LongParagraph: FC<{ charLimit: number; children: string }> = ({ charLimit,
     if (children.length > charLimit) {
       return [children.substring(0, charLimit) + '...', children.substring(charLimit)];
     }
+
     return [children, null];
   }, [charLimit, children]);
 
@@ -15,6 +16,7 @@ const LongParagraph: FC<{ charLimit: number; children: string }> = ({ charLimit,
   };
 
   if (!second) return <p className="text-sm">{first}</p>;
+
   return (
     <>
       <p className="max-h-48 overflow-auto text-sm">
@@ -25,11 +27,12 @@ const LongParagraph: FC<{ charLimit: number; children: string }> = ({ charLimit,
           more
         </p>
       ) : (
-        <p onClick={handleToggleExpand} className="text-blue-600 hover:cursor-pointer hover:underline">
+        <p className="text-blue-600 hover:cursor-pointer hover:underline" onClick={handleToggleExpand}>
           less
         </p>
       )}
     </>
   );
 };
+
 export default LongParagraph;
