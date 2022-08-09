@@ -1,12 +1,12 @@
 import { FC } from 'react';
 import { IconType } from 'react-icons';
 
-interface AdminCardProps {
+interface TileCardProps {
   title: string;
   description: string;
   icon: IconType;
 }
-export const AdminCard: FC<AdminCardProps> = ({ title, description, icon: Icon }) => {
+export const TileCard: FC<TileCardProps> = ({ title, description, icon: Icon }) => {
   return (
     <article className="flex h-32 w-60 rounded-lg bg-orange-300 p-4 shadow-md shadow-gray-500">
       <section aria-label="icon">
