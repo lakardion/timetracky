@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { dateInputValidateZod, nonWorkHourExceptionZod, refineStringIsNumberFn } from 'common/validators';
+import { nonWorkHourExceptionZod, refineStringIsNumberFn } from 'common/validators';
 import { Button } from 'components/button';
 import { FormValidationError, Input } from 'components/form';
 import { Modal } from 'components/modal';
+import { Spinner } from 'components/tw-spinner';
 import { format, parse } from 'date-fns';
-import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FC, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import ReactSelect from 'react-select';
 import { trpc } from 'utils/trpc';
@@ -52,7 +53,23 @@ const HolidayWorkForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
     }
   };
 
-  const onSubmit = (data: HolidayWorkInput) => {};
+  const queryClient = trpc.useContext();
+  const { mutateAsync: createHourException } = trpc.useMutation('hours.createException', {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['hours.hourExceptionPaginated']);
+      queryClient.invalidateQueries(['hours.hourExceptionsInfinite']);
+    },
+  });
+
+  const onSubmit = async (data: HolidayWorkInput) => {
+    await createHourException({
+      date: parse(data.dateOption.value, 'yyyy-MM-dd', new Date()),
+      hours: parseFloat(data.hours),
+      type: 'HOLIDAY_WORK',
+      notes: data.description,
+    });
+    onFinished();
+  };
 
   const holidayOptions = useMemo(() => {
     return holidays?.map((ce) => ({ value: ce.start.date, label: `${format(parse(ce.start.date, 'yyyy-MM-dd', new Date()), 'MM-dd')} - ${ce.summary}`, description: ce.summary }));
@@ -103,6 +120,31 @@ const HolidayWorkForm: FC<{ onFinished: () => void }> = ({ onFinished }) => {
   );
 };
 
+const HolidayWorkList: FC<{ handleEdit: (id: string) => void; handleDelete: (id: string) => void }> = ({ handleDelete, handleEdit }) => {
+  const [page, setPage] = useState(1);
+  const { data: holidayWorkItems, isLoading: isHolidayItemsLoading } = trpc.useQuery(['hours.hourExceptionPaginated', { page, types: ['HOLIDAY_WORK'] }]);
+
+  if (!holidayWorkItems && isHolidayItemsLoading) {
+    return <Spinner />;
+  }
+
+  if (!holidayWorkItems?.results.length) return <p className="italic">There are no holiday work items registered</p>;
+
+  return (
+    <ul className="flex w-full flex-col gap-3 md:w-[40%]">
+      {holidayWorkItems?.results.map((hwi) => (
+        <li key={hwi.id} className="flex items-center gap-3 rounded-lg bg-gray-300">
+          <section className="flex flex-col items-center justify-center p-3">
+            <p className="text-xl font-medium">{hwi.hours}hs</p>
+            <p>{format(hwi.date, 'MM-dd-yyyy')}</p>
+          </section>
+          <section>{hwi.notes}</section>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 const HolidaysWork = () => {
   const [currentId, setCurrentId] = useState('');
   const [showCreateEditModal, setShowCreateEditModal] = useState(false);
@@ -115,10 +157,13 @@ const HolidaysWork = () => {
   };
   const submitHolidayWork = () => {};
 
-  return (
-    <section aria-label="Holidays work main" className="flex justify-center">
-      <Button onClick={handleAddHolidayWork}>Add holiday work</Button>
+  const handleEdit = (id: string) => {};
+  const handleDelete = (id: string) => {};
 
+  return (
+    <section aria-label="Holidays work main" className="flex flex-col items-center justify-center gap-3">
+      <Button onClick={handleAddHolidayWork}>Add holiday work</Button>
+      <HolidayWorkList handleDelete={handleDelete} handleEdit={handleEdit} />
       {showCreateEditModal ? (
         <Modal onBackdropClick={onFinishCreate}>
           <HolidayWorkForm onFinished={onFinishCreate} />

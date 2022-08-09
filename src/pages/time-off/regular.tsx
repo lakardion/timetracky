@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { HourExceptionType } from '@prisma/client';
-import { dateInputValidateZod, nonWorkHourExceptionZod, WorkHourException, workHourExceptionZod } from 'common/validators';
+import { dateInputValidateZod, WorkHourException, workHourExceptionZod } from 'common/validators';
 import { Button } from 'components/button';
 import { FormValidationError, Input } from 'components/form';
 import { Modal } from 'components/modal';
@@ -26,12 +26,12 @@ const TimeOffList = () => {
   }, [data?.pages]);
 
   if (isLoading) return <Spinner />;
-  if (!allPages.length) return <p className="italic">No days off registered </p>;
+  if (!allPages.length) return <p className="text-center italic">No days off registered </p>;
 
   return (
     <ul className="flex flex-col gap-3">
       {allPages.map((to) => (
-        <li key={to.id} className="rounded-lg bg-gray-200">
+        <li key={to.id} className="rounded-lg bg-gray-300">
           <section className="px-4 py-2">
             <header>{mapHourExceptionTypeToLabel[to.type]}</header>
             <p className="text-sm">

@@ -8,7 +8,7 @@ import { HoursCalendar, RangeChangeEventHandler } from 'components/hour-calendar
 import { HourList } from 'components/hours/hour-list';
 import { DateFilter } from 'components/hours/types';
 import { Modal } from 'components/modal';
-import { BackdropSpinner } from 'components/tw-spinner';
+import { BackdropSpinner, Spinner } from 'components/tw-spinner';
 import { isSameDay } from 'date-fns';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -249,7 +249,7 @@ const HoursMain = () => {
   const [editingHourId, setEditingHourId] = useState('');
   const queryClient = trpc.useContext();
   const { data: user } = trpc.useQuery(['auth.me']);
-  const { data: hasProjects } = trpc.useQuery(['projects.any']);
+  const { data: hasProjects, isLoading: isLoadingProjects } = trpc.useQuery(['projects.any']);
   const {
     mutateAsync: deleteOne,
     isLoading: isDeleting,
@@ -302,6 +302,10 @@ const HoursMain = () => {
     };
   }, [datesSelected]);
 
+  if (isLoadingProjects) {
+    return <Spinner />;
+  }
+
   if (!hasProjects) {
     const noProjectsMessage =
       user && user.roleType === RoleType.ADMIN ? (
@@ -342,6 +346,7 @@ const HoursMain = () => {
     </>
   );
 };
+
 const Hours = () => {
   return (
     <section className="hours-container flex flex-col gap-3 2xl:flex-row 2xl:justify-around 2xl:gap-8 2xl:px-4">

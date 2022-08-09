@@ -272,8 +272,9 @@ export const hourRouter = createRouter()
       hours: z.number(),
       date: z.date(),
       type: z.nativeEnum(HourExceptionType),
+      notes: z.string().optional(),
     }),
-    async resolve({ ctx, input: { hours, date, type } }) {
+    async resolve({ ctx, input: { hours, date, type, notes } }) {
       //doing this to assert user.id is available here. It definitely should else it's okay to throw
       if (!ctx.session?.user?.id) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Must be logged in to perform this request' });
       const hourException = await ctx.prisma.hourException.create({
@@ -281,8 +282,8 @@ export const hourRouter = createRouter()
           hours: hours,
           userId: ctx.session.user.id,
           date,
-          // we know WorkHourException is a subtype
-          type: type as HourExceptionType,
+          type: type,
+          notes,
         },
       });
 
