@@ -11,6 +11,20 @@ export const getPagination = ({ count, size, page }: { count: number; size: numb
   };
 };
 
+export const regularPaginationZod = z.object({
+  page: z.number(),
+  size: z.number().optional(),
+});
+
+export type PaginationReturn<TMap> = {
+  page: number;
+  count: number;
+  totalPages: number;
+  nextPage: number | null;
+  previousPage: number | null;
+  results: TMap[];
+};
+
 export const cursorPaginationZod = z.object({
   cursor: z
     .object({

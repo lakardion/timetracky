@@ -1,11 +1,9 @@
-import { auth, calendar } from '@googleapis/calendar';
-
-enum Calendars {
+export enum Calendars {
   US = 'en.us',
   AR = 'es.ar',
   EN_AR = 'en.ar',
 }
-type CalendarsType = `${Calendars}`;
+export type CalendarsType = `${Calendars}`;
 const BASE_HOLIDAY_CAL_ID = `holiday@group.v.calendar.google.com`;
 
 //FOR REAL GOOGLE???
@@ -17,7 +15,7 @@ const BASE_HOLIDAY_CAL_ID = `holiday@group.v.calendar.google.com`;
 //   return calendar.data;
 // };
 
-//can't typesafe completely, this if the gcal api is so bad that I can't even auth with a simple api key...
+//can't typesafe completely this if the gcal api is so bad that I can't even auth with a simple api key...
 type CalendarEvent = {
   id: string;
   start: {

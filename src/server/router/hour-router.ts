@@ -1,7 +1,7 @@
 import { HourExceptionType } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
-import { createHourZod } from 'common/validators';
-import { cursorPaginationZod, DEFAULT_HOURS_PAGE_SIZE, getPagination } from 'utils/pagination';
+import { createHourZod, nonWorkHourExceptionZod, WorkHourException, workHourExceptionZod } from 'common/validators';
+import { cursorPaginationZod, DEFAULT_HOURS_PAGE_SIZE, getPagination, PaginationReturn, regularPaginationZod } from 'utils/pagination';
 import { z } from 'zod';
 import { createRouter } from './context';
 
@@ -67,6 +67,7 @@ export const hourRouter = createRouter()
       }
       const limit = cursor?.limit ? cursor.limit : clientLimit;
       let dateWhereClause = undefined;
+
       if (dateFilter instanceof Date) {
         dateWhereClause = dateFilter;
       } else if (dateFilter) {
@@ -102,6 +103,7 @@ export const hourRouter = createRouter()
           date: 'desc',
         },
       });
+
       return {
         hours: hours.map((h) => ({ ...h, value: h.value.toNumber() })),
         nextCursor: Math.ceil(totalHours / limit) > cursor.page ? { page: cursor.page + 1, limit } : null,
@@ -117,6 +119,7 @@ export const hourRouter = createRouter()
       const currentUser = await ctx.prisma.user.findUnique({
         where: { id: ctx.session?.user?.id ?? '' },
       });
+
       if (!currentUser) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -139,6 +142,7 @@ export const hourRouter = createRouter()
           },
         },
       });
+
       return hours.map((h) => ({ ...h, value: h.value.toNumber() }));
     },
   })
@@ -162,6 +166,7 @@ export const hourRouter = createRouter()
           },
         },
       });
+
       return newHour;
     },
   })
@@ -203,11 +208,17 @@ export const hourRouter = createRouter()
       return ctx.prisma.hour.delete({ where: { id } });
     },
   })
+  //TODO remove infinite, we may want this to be plain pagination rather
   .query('hourExceptionsInfinite', {
     input: cursorPaginationZod,
     async resolve({ ctx, input: { cursor, limit: clientLimit = DEFAULT_HOURS_PAGE_SIZE } }) {
       const limit = cursor?.limit ? cursor.limit : clientLimit;
       const hourExceptions = await ctx.prisma.hourException.findMany({
+        where: {
+          type: {
+            notIn: [HourExceptionType.HOLIDAY_WORK],
+          },
+        },
         orderBy: {
           date: 'desc',
         },
@@ -215,10 +226,45 @@ export const hourRouter = createRouter()
         skip: (cursor.page - 1) * limit,
       });
       const nextCursor = hourExceptions.length === limit ? { page: cursor.page + 1, limit } : null;
+
       return {
         hourExceptions,
         nextCursor,
       };
+    },
+  })
+  .query('hourExceptionPaginated', {
+    input: regularPaginationZod.merge(z.object({ types: z.array(z.nativeEnum(HourExceptionType)) })),
+    async resolve({ ctx, input: { page, size: take = DEFAULT_HOURS_PAGE_SIZE, types } }) {
+      const totalRecords = await ctx.prisma.hourException.count({
+        where: {
+          type: {
+            in: types,
+          },
+        },
+      });
+      const hourExceptions = await ctx.prisma.hourException.findMany({
+        where: {
+          type: {
+            in: types,
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+        take,
+        skip: (page - 1) * take,
+      });
+      const paginationReturn: PaginationReturn<typeof hourExceptions[0]> = {
+        page,
+        count: totalRecords,
+        totalPages: Math.ceil(totalRecords / take),
+        nextPage: (page + 1) * take > totalRecords ? null : page + 1,
+        previousPage: page - 1 === 0 ? null : page - 1,
+        results: hourExceptions,
+      };
+
+      return paginationReturn;
     },
   })
   .mutation('createException', {
@@ -228,15 +274,18 @@ export const hourRouter = createRouter()
       type: z.nativeEnum(HourExceptionType),
     }),
     async resolve({ ctx, input: { hours, date, type } }) {
+      //doing this to assert user.id is available here. It definitely should else it's okay to throw
       if (!ctx.session?.user?.id) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Must be logged in to perform this request' });
       const hourException = await ctx.prisma.hourException.create({
         data: {
           hours: hours,
           userId: ctx.session.user.id,
           date,
-          type,
+          // we know WorkHourException is a subtype
+          type: type as HourExceptionType,
         },
       });
+
       return hourException;
     },
   });
