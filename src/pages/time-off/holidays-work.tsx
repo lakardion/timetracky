@@ -5,6 +5,7 @@ import { FormValidationError, Input } from 'components/form';
 import { Modal } from 'components/modal';
 import { Spinner } from 'components/tw-spinner';
 import { format, parse } from 'date-fns';
+import Head from 'next/head';
 import { ChangeEvent, FC, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import ReactSelect from 'react-select';
@@ -161,15 +162,20 @@ const HolidaysWork = () => {
   const handleDelete = (id: string) => {};
 
   return (
-    <section aria-label="Holidays work main" className="flex flex-col items-center justify-center gap-3">
-      <Button onClick={handleAddHolidayWork}>Add holiday work</Button>
-      <HolidayWorkList handleDelete={handleDelete} handleEdit={handleEdit} />
-      {showCreateEditModal ? (
-        <Modal onBackdropClick={onFinishCreate}>
-          <HolidayWorkForm onFinished={onFinishCreate} />
-        </Modal>
-      ) : null}
-    </section>
+    <>
+      <Head>
+        <title>Timetracky - Holiday work</title>
+      </Head>
+      <section aria-label="Holidays work main" className="flex flex-col items-center justify-center gap-3">
+        <Button onClick={handleAddHolidayWork}>Add holiday work</Button>
+        <HolidayWorkList handleDelete={handleDelete} handleEdit={handleEdit} />
+        {showCreateEditModal ? (
+          <Modal onBackdropClick={onFinishCreate}>
+            <HolidayWorkForm onFinished={onFinishCreate} />
+          </Modal>
+        ) : null}
+      </section>
+    </>
   );
 };
 

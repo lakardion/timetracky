@@ -6,6 +6,7 @@ import { FormValidationError, Input } from 'components/form';
 import { Modal } from 'components/modal';
 import { Spinner } from 'components/tw-spinner';
 import { format } from 'date-fns';
+import Head from 'next/head';
 import { FC, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import ReactSelect from 'react-select';
@@ -160,18 +161,23 @@ const RegularTimeOff = () => {
   };
 
   return (
-    <section className="flex w-full flex-col gap-3 md:m-auto md:max-w-[50%]">
-      <p className="text-center font-medium">Request some time off</p>
-      <div className="flex justify-center">
-        <Button onClick={handleCreateDayOff}>Add time off</Button>
-      </div>
-      <TimeOffList />
-      {showCreateModal ? (
-        <Modal onBackdropClick={hideCreateModal}>
-          <TimeOffForm onFinished={onFinished} />
-        </Modal>
-      ) : null}
-    </section>
+    <>
+      <Head>
+        <title>Timetracky - Time off</title>
+      </Head>
+      <section className="flex w-full flex-col gap-3 md:m-auto md:max-w-[50%]">
+        <p className="text-center font-medium">Request some time off</p>
+        <div className="flex justify-center">
+          <Button onClick={handleCreateDayOff}>Add time off</Button>
+        </div>
+        <TimeOffList />
+        {showCreateModal ? (
+          <Modal onBackdropClick={hideCreateModal}>
+            <TimeOffForm onFinished={onFinished} />
+          </Modal>
+        ) : null}
+      </section>
+    </>
   );
 };
 
